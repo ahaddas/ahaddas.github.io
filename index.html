@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Portfolio of [Your Name] — [Your Role]" />
+  <title>[Your Name] — Portfolio</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Karla:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ===================== NAVIGATION ===================== -->
+  <header class="site-header" id="top">
+    <nav class="nav container">
+      <a href="#top" class="nav__logo">[Your Name]</a>
+      <ul class="nav__links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#work">Work</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="hero">
+      <div class="container hero__inner">
+        <p class="hero__eyebrow">Hello, I'm</p>
+        <h1 class="hero__name">[Your Name]</h1>
+        <p class="hero__role">[Your Role / Tagline]</p>
+        <a href="#work" class="btn">View my work</a>
+      </div>
+      <div class="hero__scroll-hint" aria-hidden="true">scroll</div>
+    </section>
+
+    <!-- ===================== ABOUT ===================== -->
+    <section class="section about" id="about">
+      <div class="container about__inner">
+        <div class="section__label">01 — About</div>
+        <div class="about__content">
+          <div class="about__text">
+            <h2 class="section__heading">A little about me</h2>
+            <p>
+              This is where your bio goes. Speak directly to the kind of work you do and the value you bring.
+              Keep it personal, keep it real. Two or three paragraphs is plenty.
+            </p>
+            <p>
+              You might mention where you're based, what drives you, and what kind of projects you're
+              excited to take on next.
+            </p>
+          </div>
+          <div class="about__skills">
+            <h3 class="about__skills-heading">Skills &amp; Tools</h3>
+            <ul class="skills-list">
+              <li>Skill One</li>
+              <li>Skill Two</li>
+              <li>Skill Three</li>
+              <li>Skill Four</li>
+              <li>Skill Five</li>
+              <li>Skill Six</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WORK ===================== -->
+    <section class="section work" id="work">
+      <div class="container">
+        <div class="section__label">02 — Work</div>
+        <h2 class="section__heading">Selected projects</h2>
+
+        <div class="projects-grid">
+
+          <!-- Project Card — repeat as needed -->
+          <article class="project-card">
+            <div class="project-card__image">
+              <!-- Replace with <img src="..." alt="..." /> -->
+              <div class="project-card__image-placeholder"></div>
+            </div>
+            <div class="project-card__body">
+              <div class="project-card__meta">
+                <span class="project-card__category">Category</span>
+                <span class="project-card__year">2024</span>
+              </div>
+              <h3 class="project-card__title">Project Title</h3>
+              <p class="project-card__desc">
+                A short description of the project — what it is, what problem it solved, and your role.
+              </p>
+              <div class="project-card__links">
+                <a href="#" class="project-card__link">View project →</a>
+                <a href="#" class="project-card__link project-card__link--ghost">GitHub →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card">
+            <div class="project-card__image">
+              <div class="project-card__image-placeholder"></div>
+            </div>
+            <div class="project-card__body">
+              <div class="project-card__meta">
+                <span class="project-card__category">Category</span>
+                <span class="project-card__year">2024</span>
+              </div>
+              <h3 class="project-card__title">Project Title</h3>
+              <p class="project-card__desc">
+                A short description of the project — what it is, what problem it solved, and your role.
+              </p>
+              <div class="project-card__links">
+                <a href="#" class="project-card__link">View project →</a>
+                <a href="#" class="project-card__link project-card__link--ghost">GitHub →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card">
+            <div class="project-card__image">
+              <div class="project-card__image-placeholder"></div>
+            </div>
+            <div class="project-card__body">
+              <div class="project-card__meta">
+                <span class="project-card__category">Category</span>
+                <span class="project-card__year">2023</span>
+              </div>
+              <h3 class="project-card__title">Project Title</h3>
+              <p class="project-card__desc">
+                A short description of the project — what it is, what problem it solved, and your role.
+              </p>
+              <div class="project-card__links">
+                <a href="#" class="project-card__link">View project →</a>
+                <a href="#" class="project-card__link project-card__link--ghost">GitHub →</a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT ===================== -->
+    <section class="section contact" id="contact">
+      <div class="container contact__inner">
+        <div class="section__label">03 — Contact</div>
+        <h2 class="section__heading contact__heading">Let's work together</h2>
+        <p class="contact__sub">
+          Have a project in mind or just want to say hello?
+          My inbox is always open.
+        </p>
+        <a href="mailto:you@example.com" class="btn btn--large">Say hello →</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">© <span id="year"></span> [Your Name]. All rights reserved.</p>
+      <ul class="footer__socials">
+        <li><a href="#" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="#" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="#" target="_blank" rel="noopener">Dribbble</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    // Auto-update copyright year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Scroll-based header shrink
+    const header = document.querySelector('.site-header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('site-header--scrolled', window.scrollY > 60);
+    });
+
+    // Fade-in on scroll (Intersection Observer)
+    const fadeEls = document.querySelectorAll('.project-card, .about__content, .contact__inner');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    fadeEls.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
