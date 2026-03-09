@@ -26,6 +26,23 @@ const DEFAULT_CONFIG = {
   }
 };
 
+/* -------------------------------------------------------
+   GOOGLE DRIVE URL CONVERTER
+   Converts share links like:
+     https://drive.google.com/file/d/FILE_ID/view?usp=...
+   to direct-access URLs usable in <video> and <img> tags.
+   Non-Drive URLs are returned unchanged.
+------------------------------------------------------- */
+function driveUrl(url) {
+  if (!url) return url;
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (!match) return url;
+  const id = match[1];
+  // uc?export=download works for both images and video.
+  // For images, ?export=view also works but download is consistent.
+  return `https://drive.google.com/uc?export=download&id=${id}`;
+}
+
 function getConfig() {
   try {
     const stored = localStorage.getItem("kioskConfig");
@@ -129,15 +146,72 @@ function cyclePanels() {
 }
 
 /* -------------------------------------------------------
+   PRELOADER
+   Called when "Start Display" is clicked. Fetches the video
+   and any images referenced in the schedule so they are
+   cached by the browser before the display begins.
+------------------------------------------------------- */
+async function preloadAssets(onProgress) {
+  const cfg = getConfig();
+  const assets = [];
+
+  // Promo video
+  if (cfg.promoUrl) assets.push({ url: driveUrl(cfg.promoUrl), type: "video" });
+
+  // Logo
+  if (cfg.logoUrl) assets.push({ url: driveUrl(cfg.logoUrl), type: "image" });
+
+  // Schedule images — load the CSV to find them
+  try {
+    const events = await loadScheduleCSV();
+    events.forEach(e => {
+      if (e.image) assets.push({ url: driveUrl(e.image), type: "image" });
+    });
+  } catch (_) {}
+
+  if (assets.length === 0) { onProgress(1, 1); return; }
+
+  let done = 0;
+
+  await Promise.allSettled(assets.map(asset => new Promise(resolve => {
+    if (asset.type === "image") {
+      const img = new Image();
+      img.onload = img.onerror = () => { onProgress(++done, assets.length); resolve(); };
+      img.src = asset.url;
+    } else {
+      // For video, fetch a range request — enough for the browser to buffer the start
+      fetch(asset.url, { headers: { Range: "bytes=0-1048575" } })  // first 1 MB
+        .then(r => r.blob())
+        .catch(() => {})
+        .finally(() => { onProgress(++done, assets.length); resolve(); });
+    }
+  })));
+}
+
+/* -------------------------------------------------------
    START BUTTON
 ------------------------------------------------------- */
-document.getElementById("startBtn").addEventListener("click", () => {
+document.getElementById("startBtn").addEventListener("click", async () => {
   const cfg = getConfig();
   if (!cfg.scheduleUrl || !cfg.leaderboardUrl) {
-    // Force open settings if URLs not yet configured
     openSettings();
     return;
   }
+
+  // Show loading state
+  const btn = document.getElementById("startBtn");
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Loading… 0%";
+
+  await preloadAssets((done, total) => {
+    const pct = Math.round((done / total) * 100);
+    btn.textContent = `Loading… ${pct}%`;
+  });
+
+  btn.textContent = originalText;
+  btn.disabled = false;
+
   fullscreenAllowed = true;
   document.getElementById("startOverlay").style.display = "none";
   startLoops();
@@ -338,7 +412,7 @@ function updateEventInfoPanel(event) {
 
   descEl.innerHTML   = event.description || "";
   imgContainer.innerHTML = event.image
-    ? `<img src="${event.image}" alt="">`
+    ? `<img src="${driveUrl(event.image)}" alt="">`
     : "";
 }
 
@@ -447,9 +521,10 @@ function showToast(msg) {
 
 function applyRibbonLogo() {
   const cfg = getConfig();
+  const url = driveUrl(cfg.logoUrl || "");
   document.querySelectorAll(".ribbon").forEach(el => {
-    if (cfg.logoUrl) {
-      el.style.backgroundImage = `url("${cfg.logoUrl}")`;
+    if (url) {
+      el.style.backgroundImage = `url("${url}")`;
       el.style.display = "";
     } else {
       el.style.display = "none";
@@ -459,8 +534,8 @@ function applyRibbonLogo() {
 
 function applyVideoSrc() {
   const cfg = getConfig();
+  const url = driveUrl(cfg.promoUrl || "");
   const video = document.getElementById("promo");
-  const url = cfg.promoUrl || "";
   if (video.getAttribute("src") !== url) {
     video.src = url;
   }
