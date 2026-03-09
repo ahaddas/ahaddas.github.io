@@ -1,4 +1,14 @@
 /* -------------------------------------------------------
+   THEME VARIABLES — set dynamically by applyTheme() in app.js
+------------------------------------------------------- */
+:root {
+  --bg:     #03531b;
+  --accent: #1db954;
+  --text:   #ffffff;
+  --text-dim: #022f10;
+}
+
+/* -------------------------------------------------------
    GLOBAL LAYOUT
 ------------------------------------------------------- */
 html, body {
@@ -7,8 +17,11 @@ html, body {
 }
 
 body {
-  background: #03531b;
-  color: white;
+  background: var(--bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--text);
   font-family: Arial, sans-serif;
   text-align: left;
   padding-left: 10%;
@@ -116,8 +129,8 @@ button:active { transform: scale(0.97); }
 #startBtn, .btn-primary {
   padding: 16px 36px;
   font-size: 20px;
-  background: #1db954;
-  color: white;
+  background: var(--accent);
+  color: var(--text);
   font-weight: bold;
   letter-spacing: 0.03em;
   min-width: 220px;
@@ -128,41 +141,13 @@ button:active { transform: scale(0.97); }
 .btn-secondary {
   padding: 12px 28px;
   background: rgba(255,255,255,0.12);
-  color: white;
+  color: var(--text);
   border: 1px solid rgba(255,255,255,0.25);
   min-width: 220px;
 }
 
 .btn-secondary:hover { background: rgba(255,255,255,0.2); }
 
-/* -------------------------------------------------------
-   GEAR BUTTON (always on screen)
-------------------------------------------------------- */
-#gearBtn {
-  position: fixed;
-  bottom: 18px;
-  right: 18px;
-  z-index: 8000;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.35);
-  color: rgba(255,255,255,0.5);
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255,255,255,0.15);
-  padding: 0;
-  min-width: unset;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-#gearBtn:hover {
-  background: rgba(0,0,0,0.6);
-  color: white;
-}
 
 /* -------------------------------------------------------
    SETTINGS OVERLAY
@@ -180,7 +165,7 @@ button:active { transform: scale(0.97); }
 }
 
 .settings-modal {
-  background: #0e3d1f;
+  background: color-mix(in srgb, var(--bg) 70%, black);
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 16px;
   width: 100%;
@@ -210,7 +195,7 @@ button:active { transform: scale(0.97); }
 
 .settings-close {
   background: rgba(255,255,255,0.1);
-  color: white;
+  color: var(--text);
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -270,7 +255,7 @@ button:active { transform: scale(0.97); }
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #6fcf97;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -298,7 +283,7 @@ button:active { transform: scale(0.97); }
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 7px;
-  color: white;
+  color: var(--text);
   padding: 10px 12px;
   font-size: 14px;
   font-family: 'Courier New', monospace;
@@ -310,15 +295,15 @@ button:active { transform: scale(0.97); }
 
 .cfg-section input:focus,
 .cfg-section select:focus {
-  border-color: #1db954;
+  border-color: var(--accent);
   background: rgba(255,255,255,0.11);
 }
 
 .cfg-section input::placeholder { opacity: 0.35; }
 
 .cfg-section select option {
-  background: #0e3d1f;
-  color: white;
+  background: color-mix(in srgb, var(--bg) 70%, black);
+  color: var(--text);
 }
 
 .cfg-grid {
@@ -338,8 +323,8 @@ button:active { transform: scale(0.97); }
   position: fixed;
   bottom: 70px;
   right: 20px;
-  background: #1db954;
-  color: white;
+  background: var(--accent);
+  color: var(--text);
   font-size: 14px;
   font-weight: bold;
   padding: 12px 20px;
@@ -369,7 +354,7 @@ button:active { transform: scale(0.97); }
 h1 {
   font-size: 48px;
   margin-bottom: 40px;
-  color: white;
+  color: var(--text);
 }
 
 .event {
@@ -394,14 +379,14 @@ h1 {
 .event .title {
   font-size: 40px;
   font-weight: bold;
-  color: white;
+  color: var(--text);
 }
 
 .event .subtitle {
   font-size: 28px;
   opacity: 0.8;
   font-weight: bold;
-  color: #022f10;
+  color: var(--text-dim);
 }
 
 /* -------------------------------------------------------
@@ -561,3 +546,48 @@ video {
   padding: 1px 4px;
   border-radius: 3px;
 }
+
+/* -------------------------------------------------------
+   COLOR PICKER ROWS
+------------------------------------------------------- */
+.cfg-color-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cfg-color-swatch {
+  width: 42px;
+  height: 38px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 7px;
+  padding: 2px;
+  background: rgba(255,255,255,0.07);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cfg-color-swatch::-webkit-color-swatch-wrapper { padding: 0; }
+.cfg-color-swatch::-webkit-color-swatch { border-radius: 4px; border: none; }
+
+.cfg-color-row input[type="text"] {
+  flex: 1;
+}
+
+/* -------------------------------------------------------
+   RESET / DANGER BUTTON
+------------------------------------------------------- */
+.btn-danger {
+  padding: 12px 24px;
+  font-size: 16px;
+  background: rgba(220, 53, 69, 0.15);
+  color: #ff6b7a;
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  transition: background 0.2s;
+  min-width: unset;
+}
+
+.btn-danger:hover { background: rgba(220, 53, 69, 0.28); }
