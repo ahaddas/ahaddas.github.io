@@ -33,14 +33,18 @@ const DEFAULT_CONFIG = {
    to direct-access URLs usable in <video> and <img> tags.
    Non-Drive URLs are returned unchanged.
 ------------------------------------------------------- */
-function driveUrl(url) {
+function driveUrl(url, type = "file") {
   if (!url) return url;
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (!match) return url;
   const id = match[1];
-  // uc?export=download works for both images and video.
-  // For images, ?export=view also works but download is consistent.
-  return `https://drive.google.com/uc?export=download&id=${id}`;
+  // &confirm=t bypasses the Google Drive virus-scan interstitial page,
+  // which otherwise serves an HTML page instead of the file — causing
+  // videos to show a black screen and images to break.
+  if (type === "image") {
+    return `https://drive.google.com/uc?export=view&id=${id}&confirm=t`;
+  }
+  return `https://drive.google.com/uc?export=download&id=${id}&confirm=t`;
 }
 
 function getConfig() {
@@ -156,16 +160,16 @@ async function preloadAssets(onProgress) {
   const assets = [];
 
   // Promo video
-  if (cfg.promoUrl) assets.push({ url: driveUrl(cfg.promoUrl), type: "video" });
+  if (cfg.promoUrl) assets.push({ url: driveUrl(cfg.promoUrl, "file"), type: "video" });
 
   // Logo
-  if (cfg.logoUrl) assets.push({ url: driveUrl(cfg.logoUrl), type: "image" });
+  if (cfg.logoUrl) assets.push({ url: driveUrl(cfg.logoUrl, "image"), type: "image" });
 
   // Schedule images — load the CSV to find them
   try {
     const events = await loadScheduleCSV();
     events.forEach(e => {
-      if (e.image) assets.push({ url: driveUrl(e.image), type: "image" });
+      if (e.image) assets.push({ url: driveUrl(e.image, "image"), type: "image" });
     });
   } catch (_) {}
 
@@ -310,7 +314,18 @@ function playPromo(fromUserGesture = false) {
 
   video.style.display = "block";
   video.currentTime = 0;
-  video.play().catch(() => {});
+
+  video.onerror = () => {
+    console.error("[promo] Video error:", video.error?.code, video.error?.message, video.src);
+    video.style.display = "none";
+    slideEventsIn();
+  };
+
+  video.play().catch(err => {
+    console.error("[promo] play() rejected:", err);
+    video.style.display = "none";
+    slideEventsIn();
+  });
 
   // Fullscreen only works when triggered directly by a user gesture
   if (fullscreenAllowed && fromUserGesture) {
@@ -412,7 +427,7 @@ function updateEventInfoPanel(event) {
 
   descEl.innerHTML   = event.description || "";
   imgContainer.innerHTML = event.image
-    ? `<img src="${driveUrl(event.image)}" alt="">`
+    ? `<img src="${driveUrl(event.image, "image")}" alt="">`
     : "";
 }
 
@@ -521,7 +536,7 @@ function showToast(msg) {
 
 function applyRibbonLogo() {
   const cfg = getConfig();
-  const url = driveUrl(cfg.logoUrl || "");
+  const url = driveUrl(cfg.logoUrl || "", "image");
   document.querySelectorAll(".ribbon").forEach(el => {
     if (url) {
       el.style.backgroundImage = `url("${url}")`;
