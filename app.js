@@ -36,19 +36,11 @@ function directUrl(url, type = "file") {
   if (!url) return url;
 
   // --- Dropbox ---
-  // Share links: https://www.dropbox.com/s/…/file.mp4?dl=0
-  // or newer:    https://www.dropbox.com/scl/fi/…?rlkey=…&dl=0
-  // Direct link: replace dl=0 with raw=1 (or add raw=1 if missing)
   if (url.includes("dropbox.com")) {
-    return url
-      .replace(/[?&]dl=\d/, m => m.replace(/dl=\d/, "raw=1"))
-      .replace(/[?&]raw=\d/, m => m.replace(/raw=\d/, "raw=1"))
-      // if neither param exists, append raw=1
-      .replace(/^(https?:\/\/(?:www\.)?dropbox\.com[^?]*)(\?.*)?$/, (_, base, qs) => {
-        if (!qs) return `${base}?raw=1`;
-        if (!/raw=/.test(qs) && !/dl=/.test(qs)) return `${base}${qs}&raw=1`;
-        return url; // already handled above
-      });
+    const u = new URL(url);
+    u.searchParams.delete("dl");
+    u.searchParams.set("raw", "1");
+    return u.toString();
   }
 
   // --- Google Drive ---
