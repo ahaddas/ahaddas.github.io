@@ -7,6 +7,13 @@ const DEFAULT_CONFIG = {
   promoUrl: "",
   promoIntervalMinutes: 5,
   logoUrl: "",
+  bgImage: "",
+  theme: {
+    bg:      "#03531b",
+    accent:  "#1db954",
+    text:    "#ffffff",
+    textDim: "#022f10"
+  },
   schedule: {
     time:        "time",
     title:       "title",
@@ -515,6 +522,39 @@ function checkPromoUrl(val) {
   }
 }
 
+/* -------------------------------------------------------
+   COLOR PICKER HELPERS
+------------------------------------------------------- */
+// Keep the swatch and hex text field in sync with each other
+function setColorField(swatchId, hex) {
+  const swatch = document.getElementById(swatchId);
+  const text   = document.getElementById(swatchId + "Hex");
+  if (swatch) swatch.value = hex;
+  if (text)   text.value   = hex;
+}
+
+function syncSwatchToText(swatchId) {
+  const swatch = document.getElementById(swatchId);
+  const text   = document.getElementById(swatchId + "Hex");
+  if (swatch && text) text.value = swatch.value;
+}
+
+function syncTextToSwatch(swatchId) {
+  const text   = document.getElementById(swatchId + "Hex");
+  const swatch = document.getElementById(swatchId);
+  if (text && swatch && /^#[0-9a-fA-F]{6}$/.test(text.value.trim())) {
+    swatch.value = text.value.trim();
+  }
+}
+
+function resetSettings() {
+  if (!confirm("Reset all settings to defaults? This cannot be undone.")) return;
+  localStorage.removeItem("kioskConfig");
+  applyTheme();
+  openSettings(); // re-open with default values populated
+  showToast("Settings reset to defaults");
+}
+
 function openSettings() {
   const cfg = getConfig();
   const s = cfg.schedule;
@@ -527,6 +567,14 @@ function openSettings() {
   checkPromoUrl(cfg.promoUrl || "");
   document.getElementById("cfg-promoInterval").value   = cfg.promoIntervalMinutes != null ? cfg.promoIntervalMinutes : 5;
   document.getElementById("cfg-logoUrl").value         = cfg.logoUrl        || "";
+  document.getElementById("cfg-bgImage").value         = cfg.bgImage        || "";
+
+  // Theme colors
+  const t = cfg.theme || DEFAULT_CONFIG.theme;
+  setColorField("cfg-colorBg",      t.bg      || DEFAULT_CONFIG.theme.bg);
+  setColorField("cfg-colorAccent",  t.accent  || DEFAULT_CONFIG.theme.accent);
+  setColorField("cfg-colorText",    t.text    || DEFAULT_CONFIG.theme.text);
+  setColorField("cfg-colorTextDim", t.textDim || DEFAULT_CONFIG.theme.textDim);
 
   document.getElementById("cfg-s-time").value        = s.time        || "time";
   document.getElementById("cfg-s-title").value       = s.title       || "title";
@@ -555,6 +603,13 @@ function saveSettings() {
     promoUrl:              document.getElementById("cfg-promoUrl").value.trim(),
     promoIntervalMinutes:  Math.max(1, Number(document.getElementById("cfg-promoInterval").value) || 5),
     logoUrl:               document.getElementById("cfg-logoUrl").value.trim(),
+    bgImage:               document.getElementById("cfg-bgImage").value.trim(),
+    theme: {
+      bg:      document.getElementById("cfg-colorBgHex").value.trim()      || DEFAULT_CONFIG.theme.bg,
+      accent:  document.getElementById("cfg-colorAccentHex").value.trim()  || DEFAULT_CONFIG.theme.accent,
+      text:    document.getElementById("cfg-colorTextHex").value.trim()    || DEFAULT_CONFIG.theme.text,
+      textDim: document.getElementById("cfg-colorTextDimHex").value.trim() || DEFAULT_CONFIG.theme.textDim,
+    },
     schedule: {
       time:        document.getElementById("cfg-s-time").value.trim()  || "time",
       title:       document.getElementById("cfg-s-title").value.trim() || "title",
@@ -576,6 +631,7 @@ function saveSettings() {
   closeSettings();
 
   // Re-apply dynamic settings immediately
+  applyTheme();
   applyRibbonLogo();
   applyVideoSrc();
   schedulePromo();
@@ -589,6 +645,19 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+function applyTheme() {
+  const cfg = getConfig();
+  const t = cfg.theme || DEFAULT_CONFIG.theme;
+  const root = document.documentElement;
+  root.style.setProperty("--bg",       t.bg      || DEFAULT_CONFIG.theme.bg);
+  root.style.setProperty("--accent",   t.accent  || DEFAULT_CONFIG.theme.accent);
+  root.style.setProperty("--text",     t.text    || DEFAULT_CONFIG.theme.text);
+  root.style.setProperty("--text-dim", t.textDim || DEFAULT_CONFIG.theme.textDim);
+
+  const bg = cfg.bgImage ? directUrl(cfg.bgImage, "image") : "";
+  document.body.style.backgroundImage = bg ? `url("${bg}")` : "";
 }
 
 function applyRibbonLogo() {
@@ -629,6 +698,7 @@ function schedulePromo() {
    MAIN LOOP
 ------------------------------------------------------- */
 function startLoops() {
+  applyTheme();
   applyRibbonLogo();
   applyVideoSrc();
   schedulePromo();
