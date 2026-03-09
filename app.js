@@ -27,25 +27,44 @@ const DEFAULT_CONFIG = {
 };
 
 /* -------------------------------------------------------
-   GOOGLE DRIVE URL CONVERTER
-   Converts share links like:
-     https://drive.google.com/file/d/FILE_ID/view?usp=...
-   to direct-access URLs usable in <video> and <img> tags.
-   Non-Drive URLs are returned unchanged.
+   URL CONVERTER
+   Converts share links from Google Drive and Dropbox into
+   direct-access URLs usable in <video> and <img> tags.
+   Non-matching URLs are returned unchanged.
 ------------------------------------------------------- */
-function driveUrl(url, type = "file") {
+function directUrl(url, type = "file") {
   if (!url) return url;
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (!match) return url;
-  const id = match[1];
-  // drive.usercontent.google.com is Google's current direct-serve domain.
-  // The old drive.google.com/uc redirects here anyway but the extra hop
-  // causes video elements to fail with "no supported sources".
-  // &confirm=t bypasses the virus-scan interstitial.
-  if (type === "image") {
-    return `https://drive.usercontent.google.com/download?id=${id}&export=view&confirm=t`;
+
+  // --- Dropbox ---
+  // Share links: https://www.dropbox.com/s/…/file.mp4?dl=0
+  // or newer:    https://www.dropbox.com/scl/fi/…?rlkey=…&dl=0
+  // Direct link: replace dl=0 with raw=1 (or add raw=1 if missing)
+  if (url.includes("dropbox.com")) {
+    return url
+      .replace(/[?&]dl=\d/, m => m.replace(/dl=\d/, "raw=1"))
+      .replace(/[?&]raw=\d/, m => m.replace(/raw=\d/, "raw=1"))
+      // if neither param exists, append raw=1
+      .replace(/^(https?:\/\/(?:www\.)?dropbox\.com[^?]*)(\?.*)?$/, (_, base, qs) => {
+        if (!qs) return `${base}?raw=1`;
+        if (!/raw=/.test(qs) && !/dl=/.test(qs)) return `${base}${qs}&raw=1`;
+        return url; // already handled above
+      });
   }
-  return `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
+
+  // --- Google Drive ---
+  // drive.usercontent.google.com is the actual serving domain.
+  // drive.google.com/uc redirects there but the hop breaks video elements.
+  // NOTE: Drive video links still fail due to auth — warn the user in the UI.
+  const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (driveMatch) {
+    const id = driveMatch[1];
+    if (type === "image") {
+      return `https://drive.usercontent.google.com/download?id=${id}&export=view&confirm=t`;
+    }
+    return `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
+  }
+
+  return url;
 }
 
 function getConfig() {
@@ -161,16 +180,16 @@ async function preloadAssets(onProgress) {
   const assets = [];
 
   // Promo video
-  if (cfg.promoUrl) assets.push({ url: driveUrl(cfg.promoUrl, "file"), type: "video" });
+  if (cfg.promoUrl) assets.push({ url: directUrl(cfg.promoUrl, "file"), type: "video" });
 
   // Logo
-  if (cfg.logoUrl) assets.push({ url: driveUrl(cfg.logoUrl, "image"), type: "image" });
+  if (cfg.logoUrl) assets.push({ url: directUrl(cfg.logoUrl, "image"), type: "image" });
 
   // Schedule images — load the CSV to find them
   try {
     const events = await loadScheduleCSV();
     events.forEach(e => {
-      if (e.image) assets.push({ url: driveUrl(e.image, "image"), type: "image" });
+      if (e.image) assets.push({ url: directUrl(e.image, "image"), type: "image" });
     });
   } catch (_) {}
 
@@ -320,7 +339,7 @@ function playPromo(fromUserGesture = false) {
 
   const video = document.getElementById("promo");
 
-  const expectedSrc = driveUrl(cfg.promoUrl, "file");
+  const expectedSrc = directUrl(cfg.promoUrl, "file");
   if (!video.src || video.getAttribute("src") !== expectedSrc) {
     video.src = expectedSrc;
     video.load();
@@ -453,7 +472,7 @@ function updateEventInfoPanel(event) {
 
   descEl.innerHTML   = event.description || "";
   imgContainer.innerHTML = event.image
-    ? `<img src="${driveUrl(event.image, "image")}" alt="">`
+    ? `<img src="${directUrl(event.image, "image")}" alt="">`
     : "";
 }
 
@@ -487,7 +506,21 @@ function resetLeaderboardAnimation() {
 ------------------------------------------------------- */
 function checkPromoUrl(val) {
   const warn = document.getElementById("cfg-promoWarning");
-  warn.style.display = val && val.includes("drive.google.com") ? "block" : "none";
+  if (val && val.includes("dropbox.com")) {
+    warn.style.color = "#68d391";
+    warn.style.background = "rgba(104,211,145,0.1)";
+    warn.style.borderColor = "rgba(104,211,145,0.3)";
+    warn.innerHTML = "✓ Dropbox link detected — will be converted to a direct URL automatically.";
+    warn.style.display = "block";
+  } else if (val && val.includes("drive.google.com")) {
+    warn.style.color = "#f6ad55";
+    warn.style.background = "rgba(246,173,85,0.1)";
+    warn.style.borderColor = "rgba(246,173,85,0.3)";
+    warn.innerHTML = "⚠ Google Drive links don't work for video — Drive doesn't serve files directly to video players. Use <strong>Dropbox</strong> (any share link works, it's converted automatically), <strong>GitHub raw</strong>, or any direct-serve host instead.";
+    warn.style.display = "block";
+  } else {
+    warn.style.display = "none";
+  }
 }
 
 function openSettings() {
@@ -568,7 +601,7 @@ function showToast(msg) {
 
 function applyRibbonLogo() {
   const cfg = getConfig();
-  const url = driveUrl(cfg.logoUrl || "", "image");
+  const url = directUrl(cfg.logoUrl || "", "image");
   document.querySelectorAll(".ribbon").forEach(el => {
     if (url) {
       el.style.backgroundImage = `url("${url}")`;
@@ -581,7 +614,7 @@ function applyRibbonLogo() {
 
 function applyVideoSrc() {
   const cfg = getConfig();
-  const url = driveUrl(cfg.promoUrl || "", "file");
+  const url = directUrl(cfg.promoUrl || "", "file");
   const video = document.getElementById("promo");
   if (video.getAttribute("src") !== url) {
     video.src = url;
