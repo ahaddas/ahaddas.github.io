@@ -49,8 +49,13 @@
           <p class="cfg-hint">Optional. Link to a publicly accessible video file (MP4 recommended). Leave blank to skip video playback entirely.</p>
 
           <label>Promo Video URL
-            <input id="cfg-promoUrl" type="url" placeholder="https://example.com/promo.mp4">
+            <input id="cfg-promoUrl" type="url" placeholder="https://example.com/promo.mp4" oninput="checkPromoUrl(this.value)">
           </label>
+          <p id="cfg-promoWarning" class="cfg-warning" style="display:none">
+            ⚠ Google Drive links don't work for video — Drive doesn't serve files directly to video players.
+            Use <strong>Dropbox</strong> (change <code>?dl=0</code> → <code>?raw=1</code>),
+            <strong>GitHub raw</strong>, or any direct-serve host instead.
+          </p>
 
           <label>Play every (minutes)
             <input id="cfg-promoInterval" type="number" min="1" max="999" placeholder="5" style="font-family: 'Courier New', monospace;">
