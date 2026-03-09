@@ -8,6 +8,8 @@ const DEFAULT_CONFIG = {
   promoIntervalMinutes: 5,
   logoUrl: "",
   bgImage: "",
+  leaderboardRows: 5,
+  upcomingCount: 3,
   theme: {
     bg:      "#03531b",
     accent:  "#1db954",
@@ -279,17 +281,16 @@ async function loadSchedule() {
 /* -------------------------------------------------------
    UPCOMING EVENTS
 ------------------------------------------------------- */
-function getNextFour(events) {
+function getNextN(events, n) {
   const now = new Date();
   const normalized = events
     .map(e => ({ ...e, parsedTime: parseDateFlexible(e.time) }))
     .filter(e => {
       if (!e.parsedTime) return false;
-      const keep = e.parsedTime > now;
-      return keep;
+      return e.parsedTime > now;
     })
     .sort((a, b) => a.parsedTime - b.parsedTime);
-  return normalized.slice(0, 4);
+  return normalized.slice(0, n);
 }
 
 function formatTime(dateStr) {
@@ -300,31 +301,61 @@ function formatTime(dateStr) {
 
 function toggleFirstEventSubtitle() {
   const e1 = document.getElementById("event1");
+  if (!e1) return;
   const subtitle = e1.querySelector(".subtitle");
+  const cfg = getConfig();
   const events = window._latestEvents || [];
-  const [first] = getNextFour(events);
+  const [first] = getNextN(events, 1);
   if (!first) return;
   toggle = !toggle;
   subtitle.textContent = toggle ? "Seuraavaksi" : formatTime(first.time);
 }
 
 async function updateUpcoming() {
+  const cfg = getConfig();
+  const count = Math.max(1, Math.min(10, Number(cfg.upcomingCount) || 3));
   const events = await loadSchedule();
   window._latestEvents = events;
-  const [first, second, third, fourth] = getNextFour(events);
+  const upcoming = getNextN(events, count);
 
-  updateEventInfoPanel(first);
+  updateEventInfoPanel(upcoming[0]);
 
-  const slots = [
-    [document.getElementById("event1"), first],
-    [document.getElementById("event2"), second],
-    [document.getElementById("event3"), third],
-    [document.getElementById("event4"), fourth]
-  ];
+  const container = document.getElementById("upcoming");
 
-  slots.forEach(([el, ev]) => {
+  // Rebuild slots if the count changed
+  let slots = container.querySelectorAll(".event");
+  if (slots.length !== count) {
+    // Remove old slots
+    slots.forEach(el => el.remove());
+    // Create new ones
+    for (let i = 0; i < count; i++) {
+      const div = document.createElement("div");
+      div.className = "event";
+      div.id = "event" + (i + 1);
+      div.innerHTML = `<div class="title"></div><div class="subtitle"></div>`;
+      container.appendChild(div);
+    }
+    slots = container.querySelectorAll(".event");
+    applyEventSlotStyles(count);
+  }
+
+  slots.forEach((el, i) => {
+    const ev = upcoming[i];
     el.querySelector(".title").textContent    = ev ? ev.title : "";
     el.querySelector(".subtitle").textContent = ev ? formatTime(ev.time) : "";
+  });
+}
+
+// Apply inline styles for transition-delay and opacity fade to event slots
+function applyEventSlotStyles(count) {
+  const slots = document.querySelectorAll(".event");
+  slots.forEach((el, i) => {
+    const delay = 0.2 + i * 0.3;
+    // Opacity fades: first two full, then fade to ~0.2 by the last slot
+    const opacity = count <= 2 ? 1 : Math.max(0.2, 1 - (i / (count - 1)) * 0.8);
+    el.style.setProperty("--slot-delay",   delay + "s");
+    el.style.setProperty("--slot-opacity", i < 2 ? 1 : opacity);
+    el.style.fontSize = i === 0 ? "" : ""; // keep first slot handled by CSS id selector
   });
 }
 
@@ -436,10 +467,14 @@ async function updateLeaderboard() {
 }
 
 function renderLeaderboard() {
+  const cfg = getConfig();
   const data = _leaderboardCache;
   if (!data) return;
 
+  const rows = Math.max(1, Number(cfg.leaderboardRows) || 5);
+
   const html = data
+    .slice(0, rows)
     .map((row, index) => `
       <div class="leaderboard-row" data-rank="${index}">
         <div class="leaderboard-left">
@@ -480,15 +515,10 @@ function updateEventInfoPanel(event) {
 function animateLeaderboard() {
   const rows = document.querySelectorAll(".leaderboard-row");
   rows.forEach((row, i) => {
-    if (i < 5) {
-      setTimeout(() => {
-        row.style.opacity   = "1";
-        row.style.transform = "translateY(0)";
-      }, i * 700);
-    } else {
+    setTimeout(() => {
       row.style.opacity   = "1";
       row.style.transform = "translateY(0)";
-    }
+    }, i * 700);
   });
 }
 
@@ -575,6 +605,8 @@ function openSettings() {
   document.getElementById("cfg-promoInterval").value   = cfg.promoIntervalMinutes != null ? cfg.promoIntervalMinutes : 5;
   document.getElementById("cfg-logoUrl").value         = cfg.logoUrl        || "";
   document.getElementById("cfg-bgImage").value         = cfg.bgImage        || "";
+  document.getElementById("cfg-leaderboardRows").value = cfg.leaderboardRows != null ? cfg.leaderboardRows : 5;
+  document.getElementById("cfg-upcomingCount").value   = cfg.upcomingCount  != null ? cfg.upcomingCount  : 3;
 
   // Theme colors
   const t = cfg.theme || DEFAULT_CONFIG.theme;
@@ -611,6 +643,8 @@ function saveSettings() {
     promoIntervalMinutes:  Math.max(1, Number(document.getElementById("cfg-promoInterval").value) || 5),
     logoUrl:               document.getElementById("cfg-logoUrl").value.trim(),
     bgImage:               document.getElementById("cfg-bgImage").value.trim(),
+    leaderboardRows:       Math.max(1, Number(document.getElementById("cfg-leaderboardRows").value) || 5),
+    upcomingCount:         Math.max(1, Number(document.getElementById("cfg-upcomingCount").value)   || 3),
     theme: {
       bg:      document.getElementById("cfg-colorBgHex").value.trim()      || DEFAULT_CONFIG.theme.bg,
       accent:  document.getElementById("cfg-colorAccentHex").value.trim()  || DEFAULT_CONFIG.theme.accent,
@@ -642,6 +676,7 @@ function saveSettings() {
   applyRibbonLogo();
   applyVideoSrc();
   schedulePromo();
+  updateUpcoming(); // rebuilds event slots if count changed
 
   // Show status toast
   showToast("Settings saved!");
