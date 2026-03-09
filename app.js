@@ -315,9 +315,18 @@ async function updateUpcoming() {
 ------------------------------------------------------- */
 function playPromo(fromUserGesture = false) {
   const cfg = getConfig();
-  if (!cfg.promoUrl) return;   // skip entirely if no video configured
+  if (!cfg.promoUrl) return;
 
   const video = document.getElementById("promo");
+
+  // If src isn't set yet (e.g. settings changed), apply it now
+  const expectedSrc = driveUrl(cfg.promoUrl, "file");
+  if (!video.src || video.getAttribute("src") !== expectedSrc) {
+    video.src = expectedSrc;
+    video.load();
+  }
+
+  console.log("[promo] attempting play. src:", video.src, "readyState:", video.readyState, "networkState:", video.networkState);
 
   document.querySelectorAll(".event").forEach(e => e.classList.remove("visible"));
 
@@ -558,11 +567,13 @@ function applyRibbonLogo() {
 
 function applyVideoSrc() {
   const cfg = getConfig();
-  const url = driveUrl(cfg.promoUrl || "");
+  const url = driveUrl(cfg.promoUrl || "", "file");
   const video = document.getElementById("promo");
   if (video.getAttribute("src") !== url) {
     video.src = url;
+    video.load(); // tell the browser to actually start loading the new source
   }
+  console.log("[promo] video src set to:", url || "(none)");
 }
 
 let _promoIntervalId = null;
