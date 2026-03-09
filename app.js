@@ -183,11 +183,20 @@ async function preloadAssets(onProgress) {
       img.onload = img.onerror = () => { onProgress(++done, assets.length); resolve(); };
       img.src = asset.url;
     } else {
-      // For video, fetch a range request — enough for the browser to buffer the start
-      fetch(asset.url, { headers: { Range: "bytes=0-1048575" } })  // first 1 MB
-        .then(r => r.blob())
-        .catch(() => {})
-        .finally(() => { onProgress(++done, assets.length); resolve(); });
+      // Use a native <video> element instead of fetch() — fetch() is blocked by
+      // CORS since Google Drive doesn't send Access-Control-Allow-Origin headers.
+      // Native media elements bypass CORS and buffer the file directly.
+      const vid = document.createElement("video");
+      vid.preload = "auto";
+      vid.muted = true;
+      const finish = () => { onProgress(++done, assets.length); resolve(); };
+      // canplaythrough = enough buffered to play without stopping
+      vid.oncanplaythrough = finish;
+      vid.onerror = finish; // still advance progress on failure
+      vid.src = asset.url;
+      vid.load();
+      // Fallback: resolve after 15s in case the event never fires
+      setTimeout(finish, 15000);
     }
   })));
 }
