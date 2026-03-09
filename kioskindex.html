@@ -72,7 +72,42 @@
           </label>
         </section>
 
-        <!-- Schedule columns -->
+        <!-- Appearance -->
+        <section class="cfg-section">
+          <h3>Appearance</h3>
+          <p class="cfg-hint">Customize colors and background. Leave background image blank to use the solid color.</p>
+
+          <div class="cfg-grid">
+            <label>Background color
+              <div class="cfg-color-row">
+                <input id="cfg-colorBg" type="color" class="cfg-color-swatch" oninput="syncSwatchToText('cfg-colorBg')">
+                <input id="cfg-colorBgHex" type="text" placeholder="#03531b" maxlength="7" oninput="syncTextToSwatch('cfg-colorBg')">
+              </div>
+            </label>
+            <label>Accent color
+              <div class="cfg-color-row">
+                <input id="cfg-colorAccent" type="color" class="cfg-color-swatch" oninput="syncSwatchToText('cfg-colorAccent')">
+                <input id="cfg-colorAccentHex" type="text" placeholder="#1db954" maxlength="7" oninput="syncTextToSwatch('cfg-colorAccent')">
+              </div>
+            </label>
+            <label>Text color
+              <div class="cfg-color-row">
+                <input id="cfg-colorText" type="color" class="cfg-color-swatch" oninput="syncSwatchToText('cfg-colorText')">
+                <input id="cfg-colorTextHex" type="text" placeholder="#ffffff" maxlength="7" oninput="syncTextToSwatch('cfg-colorText')">
+              </div>
+            </label>
+            <label>Subtitle text color
+              <div class="cfg-color-row">
+                <input id="cfg-colorTextDim" type="color" class="cfg-color-swatch" oninput="syncSwatchToText('cfg-colorTextDim')">
+                <input id="cfg-colorTextDimHex" type="text" placeholder="#022f10" maxlength="7" oninput="syncTextToSwatch('cfg-colorTextDim')">
+              </div>
+            </label>
+          </div>
+
+          <label>Background image URL <span style="opacity:0.5">(replaces background color)</span>
+            <input id="cfg-bgImage" type="url" placeholder="https://example.com/background.jpg">
+          </label>
+        </section>
         <section class="cfg-section">
           <h3>Schedule Column Names</h3>
           <p class="cfg-hint">Enter the exact header names from your CSV (case-sensitive).</p>
@@ -132,6 +167,8 @@
       </div><!-- /settings-body -->
 
       <div class="settings-footer">
+        <button class="btn-danger" onclick="resetSettings()">Reset to defaults</button>
+        <div style="flex:1"></div>
         <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
         <button class="btn-primary" onclick="saveSettings()">Save &amp; Close</button>
       </div>
@@ -141,9 +178,6 @@
 
   <!-- ── TOAST ── -->
   <div id="toast"></div>
-
-  <!-- ── GEAR BUTTON (always visible during display) ── -->
-  <button id="gearBtn" onclick="openSettings()" title="Configure">⚙</button>
 
   <!-- ── UPCOMING EVENTS (LEFT) ── -->
   <div id="upcoming">
