@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════
    products.js  –  Napoli's Pizza shared product store
    Uses localStorage so changes made in manage-products.html
-   are instantly reflected on index.html
+   are instantly reflected on pizzaindex.html
 ═══════════════════════════════════════════════════ */
 
-const PRODUCTS_KEY = 'napoli_products';
+const PRODUCTS_KEY = 'reijo_products';
 
 // ─── Default catalogue ────────────────────────────────────────────────────
 const DEFAULT_PRODUCTS = [
@@ -99,15 +99,15 @@ const DEFAULT_PRODUCTS = [
     ingredients: ['Coca-Cola','Coca-Cola Light','Limonadi','Fanta appelsiini','330ml tölkki']
   },
   {
-    id: 'dr003', name: 'Käsityöolut', category: 'drinks',
+    id: 'dr003', name: 'Kalja', category: 'drinks',
     price: 5.49, badge: null, icon: '🍺',
     colorClass: 'drinks-img-3', imageUrl: null,
-    ingredients: ['paikallinen käsityöolut','IPA','pale ale','330ml pullo']
+    ingredients: ['paikallinen kalja','IPA','pale ale','330ml pullo']
   }
 ];
 
 // ─── Ingredient library (employee can extend this) ─────────────────────
-const INGREDIENTS_KEY = 'napoli_ingredients';
+const INGREDIENTS_KEY = 'reijo_ingredients';
 
 const DEFAULT_INGREDIENTS = {
   pizza: [
