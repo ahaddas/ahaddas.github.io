@@ -51,10 +51,9 @@ function directUrl(url, type = "file") {
   }
 
   // --- Google Drive ---
-  // drive.usercontent.google.com is the actual serving domain.
-  // drive.google.com/uc redirects there but the hop breaks video elements.
-  // NOTE: Drive video links still fail due to auth — warn the user in the UI.
-  const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  // Only match actual drive.google.com share URLs, not arbitrary paths
+  // that happen to contain /d/ (e.g. Wikimedia Commons URLs).
+  const driveMatch = url.includes("drive.google.com") && url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
   if (driveMatch) {
     const id = driveMatch[1];
     if (type === "image") {
@@ -505,17 +504,25 @@ function resetLeaderboardAnimation() {
 ------------------------------------------------------- */
 function checkPromoUrl(val) {
   const warn = document.getElementById("cfg-promoWarning");
-  if (val && val.includes("dropbox.com")) {
-    warn.style.color = "#68d391";
-    warn.style.background = "rgba(104,211,145,0.1)";
-    warn.style.borderColor = "rgba(104,211,145,0.3)";
-    warn.innerHTML = "✓ Dropbox link detected — will be converted to a direct URL automatically.";
-    warn.style.display = "block";
-  } else if (val && val.includes("drive.google.com")) {
+  const lower = (val || "").toLowerCase().split("?")[0]; // ignore query params when checking extension
+
+  if (val && val.includes("drive.google.com")) {
     warn.style.color = "#f6ad55";
     warn.style.background = "rgba(246,173,85,0.1)";
     warn.style.borderColor = "rgba(246,173,85,0.3)";
     warn.innerHTML = "⚠ Google Drive links don't work for video — Drive doesn't serve files directly to video players. Use <strong>Dropbox</strong> (any share link works, it's converted automatically), <strong>GitHub raw</strong>, or any direct-serve host instead.";
+    warn.style.display = "block";
+  } else if (lower.endsWith(".mov") || lower.endsWith(".avi") || lower.endsWith(".wmv")) {
+    warn.style.color = "#f6ad55";
+    warn.style.background = "rgba(246,173,85,0.1)";
+    warn.style.borderColor = "rgba(246,173,85,0.3)";
+    warn.innerHTML = "⚠ <strong>." + lower.split(".").pop() + "</strong> files only play in Safari. For cross-browser support, convert to <strong>.mp4</strong> first — the codec doesn't need to change, just the container. Use VLC, HandBrake, or: <code>ffmpeg -i input.mov -c copy output.mp4</code>";
+    warn.style.display = "block";
+  } else if (val && val.includes("dropbox.com")) {
+    warn.style.color = "#68d391";
+    warn.style.background = "rgba(104,211,145,0.1)";
+    warn.style.borderColor = "rgba(104,211,145,0.3)";
+    warn.innerHTML = "✓ Dropbox link detected — will be converted to a direct URL automatically.";
     warn.style.display = "block";
   } else {
     warn.style.display = "none";
