@@ -320,7 +320,6 @@ function playPromo(fromUserGesture = false) {
 
   const video = document.getElementById("promo");
 
-  // If src isn't set yet (e.g. settings changed), apply it now
   const expectedSrc = driveUrl(cfg.promoUrl, "file");
   if (!video.src || video.getAttribute("src") !== expectedSrc) {
     video.src = expectedSrc;
@@ -328,6 +327,14 @@ function playPromo(fromUserGesture = false) {
   }
 
   console.log("[promo] attempting play. src:", video.src, "readyState:", video.readyState, "networkState:", video.networkState);
+
+  // networkState 3 = NETWORK_NO_SOURCE: browser got a non-video response
+  // (e.g. Google Drive's auth/redirect HTML). Skip silently.
+  if (video.networkState === 3) {
+    console.warn("[promo] networkState is NO_SOURCE — the URL didn't return a playable video. Google Drive direct links are not supported; use Dropbox (?raw=1), GitHub raw, or any direct-serve host.");
+    showToast("⚠ Video URL not playable — see console for details");
+    return;
+  }
 
   document.querySelectorAll(".event").forEach(e => e.classList.remove("visible"));
 
@@ -478,6 +485,11 @@ function resetLeaderboardAnimation() {
 /* -------------------------------------------------------
    SETTINGS PANEL
 ------------------------------------------------------- */
+function checkPromoUrl(val) {
+  const warn = document.getElementById("cfg-promoWarning");
+  warn.style.display = val && val.includes("drive.google.com") ? "block" : "none";
+}
+
 function openSettings() {
   const cfg = getConfig();
   const s = cfg.schedule;
@@ -487,6 +499,7 @@ function openSettings() {
   document.getElementById("cfg-scheduleUrl").value     = cfg.scheduleUrl    || "";
   document.getElementById("cfg-leaderboardUrl").value  = cfg.leaderboardUrl || "";
   document.getElementById("cfg-promoUrl").value        = cfg.promoUrl       || "";
+  checkPromoUrl(cfg.promoUrl || "");
   document.getElementById("cfg-promoInterval").value   = cfg.promoIntervalMinutes != null ? cfg.promoIntervalMinutes : 5;
   document.getElementById("cfg-logoUrl").value         = cfg.logoUrl        || "";
 
