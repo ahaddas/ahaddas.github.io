@@ -1,0 +1,546 @@
+/* -------------------------------------------------------
+   GLOBAL LAYOUT
+------------------------------------------------------- */
+html, body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: #03531b;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: left;
+  padding-left: 10%;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------
+   BACKGROUND RIBBONS
+------------------------------------------------------- */
+.ribbon {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 260px;
+  pointer-events: none;
+  opacity: 0.18;
+  z-index: 1;
+
+  background-image: none; /* set dynamically by applyRibbonLogo() in app.js */
+  background-repeat: repeat-y;
+  background-size: contain;
+  background-position: 0 0;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
+}
+
+.ribbon-down {
+  right: 40px;
+  animation: scrollDown 40s linear infinite;
+}
+
+.ribbon-up {
+  right: 320px;
+  animation: scrollUp 60s linear infinite;
+}
+
+@keyframes scrollDown {
+  from { background-position-y: 0; }
+  to   { background-position-y: 100%; }
+}
+
+@keyframes scrollUp {
+  from { background-position-y: 0; }
+  to   { background-position-y: -100%; }
+}
+
+/* -------------------------------------------------------
+   START OVERLAY
+------------------------------------------------------- */
+#startOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.start-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.start-logo {
+  font-size: 48px;
+  opacity: 0.6;
+  margin-bottom: 4px;
+}
+
+.start-card h2 {
+  font-size: 28px;
+  margin: 0 0 8px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  opacity: 0.9;
+}
+
+/* -------------------------------------------------------
+   SHARED BUTTON STYLES
+------------------------------------------------------- */
+button, .btn-primary, .btn-secondary {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+button:active { transform: scale(0.97); }
+
+#startBtn, .btn-primary {
+  padding: 16px 36px;
+  font-size: 20px;
+  background: #1db954;
+  color: white;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  min-width: 220px;
+}
+
+#startBtn:hover, .btn-primary:hover { opacity: 0.88; }
+
+.btn-secondary {
+  padding: 12px 28px;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.25);
+  min-width: 220px;
+}
+
+.btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+/* -------------------------------------------------------
+   GEAR BUTTON (always on screen)
+------------------------------------------------------- */
+#gearBtn {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 8000;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.5);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 0;
+  min-width: unset;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+#gearBtn:hover {
+  background: rgba(0,0,0,0.6);
+  color: white;
+}
+
+/* -------------------------------------------------------
+   SETTINGS OVERLAY
+------------------------------------------------------- */
+#settingsOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: none;          /* shown via JS */
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.settings-modal {
+  background: #0e3d1f;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.settings-close {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  padding: 0;
+  min-width: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.settings-close:hover { background: rgba(255,255,255,0.22); }
+
+.settings-body {
+  overflow-y: auto;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  flex: 1;
+}
+
+/* scrollbar styling for settings body */
+.settings-body::-webkit-scrollbar { width: 6px; }
+.settings-body::-webkit-scrollbar-track { background: transparent; }
+.settings-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+.settings-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 18px 28px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.settings-footer .btn-primary {
+  padding: 12px 28px;
+  font-size: 16px;
+  min-width: unset;
+}
+
+.settings-footer .btn-secondary {
+  padding: 12px 24px;
+  font-size: 16px;
+  min-width: unset;
+}
+
+/* -------------------------------------------------------
+   CONFIG SECTIONS
+------------------------------------------------------- */
+.cfg-section h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6fcf97;
+  font-weight: 600;
+}
+
+.cfg-hint {
+  margin: 0 0 14px;
+  font-size: 13px;
+  opacity: 0.6;
+  line-height: 1.5;
+}
+
+.cfg-section label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+
+.cfg-section label:last-child { margin-bottom: 0; }
+
+.cfg-section input[type="url"],
+.cfg-section input[type="text"],
+.cfg-section select {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 7px;
+  color: white;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cfg-section input:focus,
+.cfg-section select:focus {
+  border-color: #1db954;
+  background: rgba(255,255,255,0.11);
+}
+
+.cfg-section input::placeholder { opacity: 0.35; }
+
+.cfg-section select option {
+  background: #0e3d1f;
+  color: white;
+}
+
+.cfg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+@media (max-width: 560px) {
+  .cfg-grid { grid-template-columns: 1fr; }
+}
+
+/* -------------------------------------------------------
+   TOAST
+------------------------------------------------------- */
+#toast {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background: #1db954;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 20000;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* -------------------------------------------------------
+   UPCOMING EVENTS (LEFT SIDE)
+------------------------------------------------------- */
+#upcoming {
+  flex: 1;
+  padding-top: 10%;
+  position: relative;
+  z-index: 1;
+}
+
+h1 {
+  font-size: 48px;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.event {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.event.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#event1 .title { font-size: 48px; }
+#event1 .subtitle { font-size: 32px; }
+
+#event1.visible { transition-delay: 0.2s; }
+#event2.visible { transition-delay: 0.5s; }
+#event3.visible { transition-delay: 0.8s; opacity: 0.7; }
+#event4.visible { transition-delay: 1.1s; opacity: 0.4; }
+
+.event .title {
+  font-size: 40px;
+  font-weight: bold;
+  color: white;
+}
+
+.event .subtitle {
+  font-size: 28px;
+  opacity: 0.8;
+  font-weight: bold;
+  color: #022f10;
+}
+
+/* -------------------------------------------------------
+   SIDE PANEL (RIGHT SIDE)
+------------------------------------------------------- */
+#sidePanel {
+  flex: 1;
+  padding-left: 10%;
+  padding-right: 15%;
+  padding-top: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------
+   PANEL SYSTEM
+------------------------------------------------------- */
+#sidePanel .panel {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease;
+}
+
+#sidePanel .panel.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+#leaderboardPanel {
+  position: absolute;
+  inset: 0;
+  padding-top: 180px;
+  z-index: 5;
+}
+
+#eventInfoPanel {
+  position: relative;
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------
+   EVENT INFO CONTENT
+------------------------------------------------------- */
+#eventInfoTitle {
+  display: none;
+  font-size: 36px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+#eventInfoContent {
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#eventInfoImageContainer {
+  width: 100%;
+  max-height: 350px;
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+#eventInfoImageContainer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+#eventInfoDescription {
+  font-size: 22px;
+  line-height: 1.4;
+  text-align: left;
+  overflow-y: auto;
+  max-height: 250px;
+}
+
+/* -------------------------------------------------------
+   FULLSCREEN VIDEO
+------------------------------------------------------- */
+video {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 9999;
+  background: black;
+}
+
+/* -------------------------------------------------------
+   LEADERBOARD
+------------------------------------------------------- */
+.leaderboard-row {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  max-width: 50%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.leaderboard-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.leaderboard-name {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.leaderboard-company {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.leaderboard-score {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: right;
+  min-width: 60px;
+}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Conference Display</title>
+  <link rel="stylesheet" href="kioskstyle.css">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+  <!-- ── START OVERLAY ── -->
+  <div id="startOverlay">
+    <div class="start-card">
+      <div class="start-logo">⚙</div>
+      <h2>Conference Kiosk</h2>
+      <button id="startBtn">Start Display</button>
+      <button id="settingsBtn" class="btn-secondary" onclick="openSettings()">Configure Data Sources</button>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS OVERLAY ── -->
+  <div id="settingsOverlay">
+    <div class="settings-modal">
+
+      <div class="settings-header">
+        <h2>Data Source Configuration</h2>
+        <button class="settings-close" onclick="closeSettings()">✕</button>
+      </div>
+
+      <div class="settings-body">
+
+        <!-- URLs -->
+        <section class="cfg-section">
+          <h3>CSV Sources</h3>
+          <p class="cfg-hint">Paste any publicly accessible CSV URL. Google Sheets: File → Share → Publish to web → CSV.</p>
+
+          <label>Schedule CSV URL
+            <input id="cfg-scheduleUrl" type="url" placeholder="https://docs.google.com/spreadsheets/…/pub?…&output=csv">
+          </label>
+
+          <label>Leaderboard CSV URL
+            <input id="cfg-leaderboardUrl" type="url" placeholder="https://docs.google.com/spreadsheets/…/pub?…&output=csv">
+          </label>
+        </section>
+
+        <!-- Promo video -->
+        <section class="cfg-section">
+          <h3>Promo Video</h3>
+          <p class="cfg-hint">Optional. Link to a publicly accessible video file (MP4 recommended). Leave blank to skip video playback entirely.</p>
+
+          <label>Promo Video URL
+            <input id="cfg-promoUrl" type="url" placeholder="https://example.com/promo.mp4">
+          </label>
+
+          <label>Play every (minutes)
+            <input id="cfg-promoInterval" type="number" min="1" max="999" placeholder="5" style="font-family: 'Courier New', monospace;">
+          </label>
+        </section>
+
+        <!-- Logo / ribbons -->
+        <section class="cfg-section">
+          <h3>Logo / Background Ribbons</h3>
+          <p class="cfg-hint">Optional. URL of an image to use as the repeating ribbon pattern on the sides of the display. Leave blank to hide ribbons.</p>
+
+          <label>Logo Image URL
+            <input id="cfg-logoUrl" type="url" placeholder="https://example.com/logo.png">
+          </label>
+        </section>
+
+        <!-- Schedule columns -->
+        <section class="cfg-section">
+          <h3>Schedule Column Names</h3>
+          <p class="cfg-hint">Enter the exact header names from your CSV (case-sensitive).</p>
+
+          <div class="cfg-grid">
+            <label>Time column
+              <input id="cfg-s-time"  type="text" placeholder="time">
+            </label>
+            <label>Title column
+              <input id="cfg-s-title" type="text" placeholder="title">
+            </label>
+            <label>Description column
+              <input id="cfg-s-desc"  type="text" placeholder="description">
+            </label>
+            <label>Image URL column
+              <input id="cfg-s-image" type="text" placeholder="image">
+            </label>
+            <label>ID column (optional)
+              <input id="cfg-s-id"    type="text" placeholder="id">
+            </label>
+          </div>
+        </section>
+
+        <!-- Leaderboard columns -->
+        <section class="cfg-section">
+          <h3>Leaderboard Column Names</h3>
+          <p class="cfg-hint">
+            For a single full-name column, fill <strong>Full name column</strong> and leave First/Last blank.
+            For split columns, leave Full name blank and fill First + Last.
+          </p>
+
+          <div class="cfg-grid">
+            <label>Full name column
+              <input id="cfg-l-name"    type="text" placeholder="name  (or leave blank)">
+            </label>
+            <label>First name column
+              <input id="cfg-l-first"   type="text" placeholder="first">
+            </label>
+            <label>Last name column
+              <input id="cfg-l-last"    type="text" placeholder="last">
+            </label>
+            <label>Company column
+              <input id="cfg-l-company" type="text" placeholder="company">
+            </label>
+            <label>Score column
+              <input id="cfg-l-score"   type="text" placeholder="score">
+            </label>
+            <label>Sort order
+              <select id="cfg-l-sort">
+                <option value="asc">Ascending (lowest first)</option>
+                <option value="desc">Descending (highest first)</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+      </div><!-- /settings-body -->
+
+      <div class="settings-footer">
+        <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+        <button class="btn-primary" onclick="saveSettings()">Save &amp; Close</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TOAST ── -->
+  <div id="toast"></div>
+
+  <!-- ── GEAR BUTTON (always visible during display) ── -->
+  <button id="gearBtn" onclick="openSettings()" title="Configure">⚙</button>
+
+  <!-- ── UPCOMING EVENTS (LEFT) ── -->
+  <div id="upcoming">
+    <h1>Tulossa tänään:</h1>
+
+    <div class="event" id="event1">
+      <div class="title"></div>
+      <div class="subtitle"></div>
+    </div>
+
+    <div class="event" id="event2">
+      <div class="title"></div>
+      <div class="subtitle"></div>
+    </div>
+
+    <div class="event" id="event3">
+      <div class="title"></div>
+      <div class="subtitle"></div>
+    </div>
+
+    <div class="event" id="event4">
+      <div class="title"></div>
+      <div class="subtitle"></div>
+    </div>
+  </div>
+
+  <!-- ── SIDE PANEL (RIGHT) ── -->
+  <div id="sidePanel">
+
+    <div id="leaderboardPanel" class="panel"></div>
+
+    <div id="eventInfoPanel" class="panel">
+      <div id="eventInfoTitle"></div>
+      <div id="eventInfoContent">
+        <div id="eventInfoImageContainer"></div>
+        <div id="eventInfoDescription"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <video id="promo" preload="auto"></video>
+
+  <div class="ribbon ribbon-down"></div>
+  <div class="ribbon ribbon-up"></div>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
