@@ -38,13 +38,14 @@ function driveUrl(url, type = "file") {
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (!match) return url;
   const id = match[1];
-  // &confirm=t bypasses the Google Drive virus-scan interstitial page,
-  // which otherwise serves an HTML page instead of the file — causing
-  // videos to show a black screen and images to break.
+  // drive.usercontent.google.com is Google's current direct-serve domain.
+  // The old drive.google.com/uc redirects here anyway but the extra hop
+  // causes video elements to fail with "no supported sources".
+  // &confirm=t bypasses the virus-scan interstitial.
   if (type === "image") {
-    return `https://drive.google.com/uc?export=view&id=${id}&confirm=t`;
+    return `https://drive.usercontent.google.com/download?id=${id}&export=view&confirm=t`;
   }
-  return `https://drive.google.com/uc?export=download&id=${id}&confirm=t`;
+  return `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
 }
 
 function getConfig() {
