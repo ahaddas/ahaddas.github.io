@@ -148,6 +148,23 @@ button:active { transform: scale(0.97); }
 
 .btn-secondary:hover { background: rgba(255,255,255,0.2); }
 
+.btn-tutorial {
+  padding: 10px 28px;
+  background: transparent;
+  color: rgba(255,255,255,0.35);
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  min-width: 220px;
+  text-align: center;
+  display: inline-block;
+}
+
+.btn-tutorial:hover { color: rgba(255,255,255,0.7); }
+
 
 /* -------------------------------------------------------
    SETTINGS OVERLAY
