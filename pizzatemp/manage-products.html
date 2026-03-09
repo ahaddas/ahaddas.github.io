@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hallinnoi Valikkoa — Napolin Pizza</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <script src="products.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:      #C8321A;
+      --red-dark: #9e2612;
+      --orange:   #E85D04;
+      --gold:     #F4C430;
+      --cream:    #FDF6E3;
+      --tan:      #F0E4C8;
+      --dark:     #1A0900;
+      --charcoal: #2C1A0E;
+      --text:     #2C1A0E;
+      --muted:    #7a5c3a;
+      --white:    #ffffff;
+      --green:    #2e7d44;
+      --green-lt: #e8f5ec;
+      --shadow:   0 4px 24px rgba(26,9,0,0.10);
+      --radius:   12px;
+      --radius-lg:20px;
+      --t:        0.22s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f5f0e8;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ─────────────────────────────────────────────── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 64px;
+      background: var(--dark);
+      border-bottom: 2px solid var(--red);
+      box-shadow: 0 2px 20px rgba(200,50,26,0.25);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; font-weight: 900;
+      color: var(--cream); letter-spacing: -0.5px;
+    }
+    .nav-back {
+      color: #c9a882; font-weight: 700; font-size: 0.88rem;
+      text-decoration: none; padding: 7px 16px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 9px; transition: var(--t);
+    }
+    .nav-back:hover { color: var(--cream); border-color: rgba(255,255,255,0.35); }
+    .nav-tag {
+      background: rgba(200,50,26,0.2); color: #f4a090;
+      font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 99px; text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    .page {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 28px;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 36px 32px;
+      align-items: start;
+    }
+
+    /* ── Panel shared ────────────────────────────────────────── */
+    .panel {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 22px 28px 18px;
+      border-bottom: 2px solid var(--tan);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; color: var(--dark);
+    }
+    .panel-count {
+      background: var(--tan); color: var(--muted);
+      font-size: 0.78rem; font-weight: 700;
+      padding: 3px 10px; border-radius: 99px;
+    }
+
+    /* ── Product List ─────────────────────────────────────────── */
+    .product-list { padding: 12px; max-height: calc(100vh - 180px); overflow-y: auto; }
+    .product-list::-webkit-scrollbar { width: 6px; }
+    .product-list::-webkit-scrollbar-track { background: var(--tan); border-radius: 3px; }
+    .product-list::-webkit-scrollbar-thumb { background: var(--red); border-radius: 3px; }
+
+    .cat-group-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--muted);
+      padding: 12px 10px 6px;
+    }
+
+    .product-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; transition: var(--t);
+      border: 2px solid transparent;
+    }
+    .product-row:hover { background: var(--cream); }
+    .product-row.selected {
+      background: #fff5f3;
+      border-color: var(--red);
+    }
+    .product-row-icon {
+      font-size: 1.4rem; flex-shrink: 0;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--cream); border-radius: 8px;
+    }
+    .product-row-info { flex: 1; min-width: 0; }
+    .product-row-name {
+      font-weight: 700; font-size: 0.9rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .product-row-meta {
+      font-size: 0.75rem; color: var(--muted);
+      display: flex; gap: 8px; align-items: center; margin-top: 1px;
+    }
+    .cat-pill {
+      background: var(--tan); color: var(--muted);
+      padding: 1px 7px; border-radius: 99px; font-size: 0.68rem; font-weight: 700;
+      text-transform: capitalize;
+    }
+    .product-row-price { font-weight: 700; color: var(--red); font-size: 0.9rem; flex-shrink: 0; }
+
+    .row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .icon-btn {
+      width: 30px; height: 30px; border-radius: 7px;
+      border: 1.5px solid var(--tan); background: white;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; transition: var(--t);
+    }
+    .icon-btn.edit:hover  { border-color: var(--orange); color: var(--orange); background: #fff5ec; }
+    .icon-btn.del:hover   { border-color: var(--red); color: var(--red); background: #fff2f0; }
+
+    .list-empty {
+      text-align: center; padding: 48px 20px; color: var(--muted);
+      font-size: 0.9rem; display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
+    }
+    .list-empty-icon { font-size: 2.5rem; }
+
+    /* ── Form Panel ───────────────────────────────────────────── */
+    .form-panel { position: sticky; top: 88px; }
+    .form-body { padding: 28px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-weight: 700; font-size: 0.75rem;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.6px; margin-bottom: 7px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select {
+      width: 100%; padding: 10px 14px;
+      border: 2px solid #e8dece; border-radius: 10px;
+      font-family: 'Nunito', sans-serif; font-size: 0.95rem;
+      background: var(--cream); color: var(--text);
+      transition: var(--t); outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--red); background: white;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* Category + icon selectors */
+    .cat-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cat-opt {
+      flex: 1; min-width: 70px; text-align: center;
+      padding: 8px 6px; border: 2px solid var(--tan);
+      border-radius: 9px; cursor: pointer; font-weight: 700;
+      font-size: 0.8rem; color: var(--muted); background: var(--cream);
+      transition: var(--t); user-select: none;
+    }
+    .cat-opt:hover { border-color: #c0906a; }
+    .cat-opt.selected { background: var(--red); border-color: var(--red); color: white; }
+    .cat-opt .cat-emoji { display: block; font-size: 1.2rem; margin-bottom: 2px; }
+
+    .icon-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+    .icon-opt {
+      width: 40px; height: 40px; border-radius: 9px;
+      border: 2px solid var(--tan); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; background: var(--cream); transition: var(--t);
+    }
+    .icon-opt:hover { border-color: #c0906a; background: white; }
+    .icon-opt.selected { border-color: var(--red); background: #fff5f3; box-shadow: 0 0 0 3px rgba(200,50,26,0.15); }
+
+    /* Badge selector */
+    .badge-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge-opt {
+      padding: 5px 12px; border-radius: 99px;
+      border: 2px solid var(--tan); cursor: pointer;
+      font-size: 0.78rem; font-weight: 700; color: var(--muted);
+      background: var(--cream); transition: var(--t); user-select: none;
+    }
+    .badge-opt:hover { border-color: #c0906a; }
+    .badge-opt.selected { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+    .badge-opt[data-val="spicy"].selected   { background: var(--red); border-color: var(--red); color: white; }
+    .badge-opt[data-val="new"].selected     { background: #2e7d44; border-color: #2e7d44; color: white; }
+    .badge-opt[data-val="veg"].selected     { background: #5aaa4a; border-color: #5aaa4a; color: white; }
+    .badge-opt[data-val="none"].selected    { background: #ddd; border-color: #bbb; color: #555; }
+
+    /* Colour picker */
+    .color-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+    .color-opt {
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 2.5px solid transparent; cursor: pointer;
+      transition: var(--t);
+    }
+    .color-opt:hover { transform: scale(1.1); }
+    .color-opt.selected { border-color: var(--dark); box-shadow: 0 0 0 3px rgba(26,9,0,0.2); }
+
+    /* Ingredient section */
+    .ingredient-section {
+      border: 2px solid var(--tan); border-radius: 12px;
+      overflow: hidden; margin-bottom: 18px;
+    }
+    .ingredient-tabs {
+      display: flex; background: var(--cream);
+      border-bottom: 2px solid var(--tan);
+    }
+    .ing-tab {
+      flex: 1; padding: 8px 4px; text-align: center;
+      font-size: 0.75rem; font-weight: 700; cursor: pointer;
+      color: var(--muted); border-bottom: 2.5px solid transparent;
+      margin-bottom: -2px; transition: var(--t);
+    }
+    .ing-tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+    .ingredient-list-wrap { padding: 12px; max-height: 200px; overflow-y: auto; }
+    .ingredient-list-wrap::-webkit-scrollbar { width: 4px; }
+    .ingredient-list-wrap::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
+
+    .ingredient-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ing-chip {
+      padding: 4px 12px; border-radius: 99px;
+      border: 1.5px solid var(--tan); cursor: pointer;
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      background: white; transition: var(--t); user-select: none;
+    }
+    .ing-chip:hover { border-color: var(--red); color: var(--red); }
+    .ing-chip.selected {
+      background: var(--red); border-color: var(--red);
+      color: white;
+    }
+
+    .add-ingredient-row {
+      display: flex; gap: 8px; padding: 10px 12px 12px;
+      border-top: 1.5px solid var(--tan);
+    }
+    .add-ingredient-row input {
+      flex: 1; padding: 7px 12px;
+      border: 1.5px solid var(--tan); border-radius: 8px;
+      font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+      background: var(--cream); color: var(--text); outline: none;
+      transition: var(--t);
+    }
+    .add-ingredient-row input:focus { border-color: var(--red); background: white; }
+    .add-ingredient-row button {
+      padding: 7px 14px; border-radius: 8px;
+      background: var(--red); color: white; border: none;
+      font-weight: 700; font-size: 0.8rem; cursor: pointer;
+      font-family: 'Nunito', sans-serif; transition: var(--t);
+    }
+    .add-ingredient-row button:hover { background: var(--red-dark); }
+
+    .selected-ingredients {
+      display: flex; flex-wrap: wrap; gap: 5px;
+      padding: 8px 12px; background: #fff8f0;
+      border-top: 1.5px solid var(--tan); min-height: 38px;
+    }
+    .sel-ing-chip {
+      padding: 3px 10px; border-radius: 99px;
+      background: var(--red); color: white;
+      font-size: 0.76rem; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .sel-ing-chip button {
+      background: none; border: none; color: rgba(255,255,255,0.75);
+      cursor: pointer; font-size: 0.75rem; padding: 0; line-height: 1;
+      transition: var(--t);
+    }
+    .sel-ing-chip button:hover { color: white; }
+
+    /* Preview card */
+    .preview-section { margin-bottom: 20px; }
+    .preview-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted); margin-bottom: 10px;
+    }
+    .preview-card {
+      border-radius: 14px; overflow: hidden;
+      border: 2px solid var(--tan); box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      max-width: 280px;
+    }
+    .preview-img {
+      height: 120px; position: relative;
+      display: flex; align-items: flex-start; justify-content: flex-end; padding: 10px;
+    }
+    .preview-body { padding: 14px 16px; background: white; }
+    .preview-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; font-weight: 700; color: var(--dark); margin-bottom: 4px;
+    }
+    .preview-desc { color: var(--muted); font-size: 0.78rem; line-height: 1.4; margin-bottom: 10px; }
+    .preview-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 8px; border-top: 1.5px solid var(--tan);
+    }
+    .preview-price { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--red); }
+    .preview-add-btn {
+      background: var(--red); color: white; border: none; border-radius: 7px;
+      padding: 5px 12px; font-size: 0.8rem; font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    /* Image URL field */
+    .img-url-wrap {
+      position: relative;
+    }
+    .img-url-wrap input {
+      padding-right: 80px;
+    }
+    .img-url-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: #f0e4c8; border: none; border-radius: 6px;
+      padding: 4px 10px; font-size: 0.75rem; font-weight: 700;
+      color: var(--muted); cursor: pointer; transition: var(--t);
+      display: none;
+    }
+    .img-url-clear:hover { background: #ffe0d0; color: var(--red); }
+    .img-url-status {
+      font-size: 0.75rem; margin-top: 5px; min-height: 16px;
+      font-weight: 600;
+    }
+    .img-url-status.ok  { color: #2e7d44; }
+    .img-url-status.err { color: var(--red); }
+
+    /* Preview photo mode */
+    .preview-img.has-photo {
+      background-size: cover !important;
+      background-position: center !important;
+      background-color: #1a0900;
+    }
+
+    /* Color/icon section dim when photo is active */
+    .dimmed { opacity: 0.4; pointer-events: none; transition: opacity 0.2s; }
+
+    /* Action buttons */
+    .form-actions { display: flex; gap: 10px; margin-top: 4px; }
+    .btn-save {
+      flex: 1; padding: 12px; border: none; border-radius: 10px;
+      background: var(--red); color: white;
+      font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: var(--t);
+      box-shadow: 0 3px 12px rgba(200,50,26,0.3);
+    }
+    .btn-save:hover { background: var(--red-dark); transform: translateY(-1px); }
+    .btn-cancel {
+      padding: 12px 20px; border: 2px solid var(--tan); border-radius: 10px;
+      background: white; color: var(--muted);
+      font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: var(--t);
+    }
+    .btn-cancel:hover { border-color: var(--red); color: var(--red); }
+    .btn-reset {
+      padding: 12px 16px; border: 2px solid #e0d0c0; border-radius: 10px;
+      background: white; color: var(--muted);
+      font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: var(--t);
+    }
+    .btn-reset:hover { border-color: #c0906a; color: #a06030; }
+
+    /* Delete confirm */
+    .delete-confirm {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(26,9,0,0.65); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .delete-box {
+      background: white; border-radius: var(--radius-lg);
+      padding: 36px 32px; max-width: 360px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center; animation: popIn 0.25s ease;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.93); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .delete-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .delete-box h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 8px; }
+    .delete-box p  { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .delete-btns   { display: flex; gap: 10px; }
+    .btn-del-confirm {
+      flex: 1; padding: 11px; border: none; border-radius: 10px;
+      background: var(--red); color: white;
+      font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: var(--t);
+    }
+    .btn-del-confirm:hover { background: var(--red-dark); }
+    .btn-del-cancel {
+      flex: 1; padding: 11px; border: 2px solid var(--tan); border-radius: 10px;
+      background: white; color: var(--muted);
+      font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: var(--t);
+    }
+    .btn-del-cancel:hover { border-color: var(--red); color: var(--red); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--dark); color: var(--cream);
+      padding: 12px 26px; border-radius: 99px;
+      font-weight: 600; font-size: 0.88rem; opacity: 0;
+      transition: all 0.28s ease; z-index: 9999;
+      pointer-events: none; white-space: nowrap;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Category colour swatches data */
+    .swatch-pizza-img-1 { background: radial-gradient(circle at 50% 45%, #c8380a, #5a1505, #2a1204); }
+    .swatch-pizza-img-2 { background: radial-gradient(circle at 50% 45%, #d4410a, #6b1504, #2a1204); }
+    .swatch-pizza-img-3 { background: radial-gradient(circle at 40% 50%, #3d5a1a, #2c4012, #0d1305); }
+    .swatch-pizza-img-4 { background: radial-gradient(circle at 50% 45%, #e8c87a, #8b6425, #3a2808); }
+    .swatch-pizza-img-5 { background: radial-gradient(circle at 50% 45%, #7a9c3a, #3a5018, #1a2808); }
+    .swatch-pizza-img-6 { background: radial-gradient(circle at 50% 45%, #c8521a, #6a2508, #2a1004); }
+    .swatch-pizza-img-7 { background: radial-gradient(circle at 50% 45%, #8b2a0a, #4a1405, #1a0802); }
+    .swatch-pizza-img-8 { background: radial-gradient(circle at 50% 45%, #d4820a, #7a3804, #2a1204); }
+    .swatch-sides-img-1 { background: radial-gradient(circle at 50% 55%, #d4a84a, #7a5815, #2a1a08); }
+    .swatch-sides-img-2 { background: radial-gradient(circle at 50% 45%, #6a9c2a, #2c5010, #0e2004); }
+    .swatch-sides-img-3 { background: radial-gradient(circle at 50% 45%, #d4a030, #6a4810, #2a1a04); }
+    .swatch-dessert-img-1 { background: radial-gradient(circle at 50% 45%, #5a3820, #28180a, #100804); }
+    .swatch-dessert-img-2 { background: radial-gradient(circle at 50% 45%, #3a1a05, #7a3a10, #2a0c02); }
+    .swatch-drinks-img-1 { background: radial-gradient(circle at 50% 40%, #1a4a6a, #081a2a, #040e18); }
+    .swatch-drinks-img-2 { background: radial-gradient(circle at 50% 40%, #c00c0c, #600404, #200202); }
+    .swatch-drinks-img-3 { background: radial-gradient(circle at 50% 40%, #d4a830, #6a4c10, #2a1e04); }
+
+    /* Also need the full card-img classes for the preview */
+    .pizza-img-1  { background: radial-gradient(circle at 50% 45%, #c8380a 0%, #8b2009 30%, #5a1505 60%, #2a1204 100%); }
+    .pizza-img-2  { background: radial-gradient(circle at 50% 45%, #d4410a 0%, #a01e05 35%, #6b1504 65%, #2a1204 100%); }
+    .pizza-img-3  { background: radial-gradient(circle at 40% 50%, #3d5a1a 0%, #4a6e21 20%, #2c4012 45%, #1a2608 65%, #0d1305 100%); }
+    .pizza-img-4  { background: radial-gradient(circle at 50% 45%, #e8c87a 0%, #c4994a 30%, #8b6425 55%, #3a2808 100%); }
+    .pizza-img-5  { background: radial-gradient(circle at 50% 45%, #7a9c3a 0%, #5a7828 30%, #3a5018 55%, #1a2808 100%); }
+    .pizza-img-6  { background: radial-gradient(circle at 50% 45%, #c8521a 0%, #9e3a10 30%, #6a2508 55%, #2a1004 100%); }
+    .pizza-img-7  { background: radial-gradient(circle at 50% 45%, #8b2a0a 0%, #6b1e08 30%, #4a1405 55%, #1a0802 100%); }
+    .pizza-img-8  { background: radial-gradient(circle at 50% 45%, #d4820a 0%, #b85a05 30%, #7a3804 55%, #2a1204 100%); }
+    .sides-img-1  { background: radial-gradient(circle at 50% 55%, #d4a84a 0%, #b8842a 35%, #7a5815 65%, #2a1a08 100%); }
+    .sides-img-2  { background: radial-gradient(circle at 50% 45%, #6a9c2a 0%, #4c7818 30%, #2c5010 55%, #0e2004 100%); }
+    .sides-img-3  { background: radial-gradient(circle at 50% 45%, #d4a030 0%, #a87020 30%, #6a4810 55%, #2a1a04 100%); }
+    .dessert-img-1{ background: radial-gradient(circle at 50% 45%, #5a3820 0%, #3a2010 30%, #28180a 55%, #100804 100%); }
+    .dessert-img-2{ background: radial-gradient(circle at 50% 45%, #3a1a05 0%, #5a2808 30%, #7a3a10 55%, #2a0c02 100%); }
+    .drinks-img-1 { background: radial-gradient(circle at 50% 40%, #1a4a6a 0%, #0e3050 40%, #081a2a 70%, #040e18 100%); }
+    .drinks-img-2 { background: radial-gradient(circle at 50% 40%, #c00c0c 0%, #900808 35%, #600404 65%, #200202 100%); }
+    .drinks-img-3 { background: radial-gradient(circle at 50% 40%, #d4a830 0%, #a87820 35%, #6a4c10 65%, #2a1e04 100%); }
+
+    .card-badge {
+      background: var(--gold); color: var(--dark);
+      border-radius: 99px; padding: 3px 10px;
+      font-size: 0.72rem; font-weight: 700; z-index: 1;
+    }
+    .card-badge.spicy { background: var(--red); color: white; }
+    .card-badge.new   { background: #3a9a5a; color: white; }
+    .card-badge.veg   { background: #5aaa4a; color: white; }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .page { grid-template-columns: 1fr; }
+      .form-panel { position: static; }
+      .navbar { padding: 0 16px; }
+    }
+    @media (max-width: 600px) {
+      .page { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="nav-logo" href="index.html">
+    <span style="font-size:1.5rem">🍕</span>
+    <span class="logo-text">Napoli's</span>
+  </a>
+  <span class="nav-tag">Työntekijän Portaali</span>
+  <a class="nav-back" href="index.html">← Takaisin Sivustolle</a>
+</nav>
+
+<!-- Delete Confirm Modal -->
+<div class="delete-confirm" id="delete-confirm">
+  <div class="delete-box">
+    <div class="delete-icon">🗑️</div>
+    <h3>Poista Tuote?</h3>
+    <p id="delete-name-msg">Tämä tuote poistetaan valikosta.</p>
+    <div class="delete-btns">
+      <button class="btn-del-cancel" onclick="closeDeleteConfirm()">Peruuta</button>
+      <button class="btn-del-confirm" onclick="confirmDelete()">Poista</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="page">
+
+  <!-- ── LEFT: Product List ── -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Valikon Tuotteet</span>
+      <span class="panel-count" id="product-count">0 tuotetta</span>
+    </div>
+    <div class="product-list" id="product-list"></div>
+  </div>
+
+  <!-- ── RIGHT: Form ── -->
+  <div class="panel form-panel" id="form-panel">
+    <div class="panel-header">
+      <span class="panel-title" id="form-title">Lisää Uusi Tuote</span>
+      <button class="btn-reset" onclick="resetToDefaults()">⮸ Palauta Oletukset</button>
+    </div>
+    <div class="form-body">
+
+      <!-- Live Preview -->
+      <div class="preview-section">
+        <div class="preview-label">Elävä Esikatselu</div>
+        <div class="preview-card" id="preview-card">
+          <div class="preview-img pizza-img-1" id="preview-img">
+            <div class="card-badge" id="preview-badge" style="display:none"></div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-name" id="preview-name">Tuotteen Nimi</div>
+            <div class="preview-desc" id="preview-desc">Valitse ainesosat alla…</div>
+            <div class="preview-footer">
+              <span class="preview-price" id="preview-price">€0.00</span>
+              <button class="preview-add-btn">+ Lisää</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image URL -->
+      <div class="form-group">
+        <label>Image URL <span style="color:var(--muted);font-size:0.7rem;text-transform:none;letter-spacing:0;font-weight:400">(optional — paste a link to a photo)</span></label>
+        <div class="img-url-wrap">
+          <input type="text" id="f-img-url" placeholder="https://example.com/pizza.jpg" oninput="onImageUrlChange(this.value)"/>
+          <button class="img-url-clear" id="img-url-clear" onclick="clearImageUrl()">✕ Clear</button>
+        </div>
+        <div class="img-url-status" id="img-url-status"></div>
+      </div>
+
+      <!-- Name + Price -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tuotteen Nimi</label>
+          <input type="text" id="f-name" placeholder="esim. Margherita" oninput="updatePreview()"/>
+        </div>
+        <div class="form-group">
+          <label>Hinta (€)</label>
+          <input type="number" id="f-price" placeholder="0.00" step="0.01" min="0" oninput="updatePreview()"/>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="form-group">
+        <label>Kategoria</label>
+        <div class="cat-selector">
+          <div class="cat-opt selected" data-val="pizza"    onclick="selectCat(this)"><span class="cat-emoji">🍕</span>Pizzat</div>
+          <div class="cat-opt"          data-val="sides"    onclick="selectCat(this)"><span class="cat-emoji">🥗</span>Lisäkkeet</div>
+          <div class="cat-opt"          data-val="desserts" onclick="selectCat(this)"><span class="cat-emoji">🍮</span>Jälkiruoka</div>
+          <div class="cat-opt"          data-val="drinks"   onclick="selectCat(this)"><span class="cat-emoji">🥤</span>Juomat</div>
+        </div>
+      </div>
+
+      <!-- Icon -->
+      <div class="form-group">
+        <label>Tuotteen Kuvake</label>
+        <div class="icon-selector" id="icon-selector">
+          <!-- populated by JS based on category -->
+        </div>
+      </div>
+
+      <!-- Card Colour -->
+      <div class="form-group">
+        <label>Kortin Väri</label>
+        <div class="color-selector" id="color-selector">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Badge -->
+      <div class="form-group">
+        <label>Merkki</label>
+        <div class="badge-selector">
+          <div class="badge-opt selected" data-val="none"    onclick="selectBadge(this)">Ei mitään</div>
+          <div class="badge-opt"          data-val="popular" onclick="selectBadge(this)">⭐ Suosittu</div>
+          <div class="badge-opt"          data-val="new"     onclick="selectBadge(this)">✨ Uusi</div>
+          <div class="badge-opt"          data-val="spicy"   onclick="selectBadge(this)">🌶 Tulinen</div>
+          <div class="badge-opt"          data-val="veg"     onclick="selectBadge(this)">🌿 Kasvis</div>
+        </div>
+      </div>
+
+      <!-- Ingredients -->
+      <div class="form-group">
+        <label>Ainesosat <span style="color:var(--red);font-size:0.7rem;text-transform:none;letter-spacing:0">(napsauta lisätäksesi/poistaaksesi)</span></label>
+        <div class="ingredient-section">
+          <div class="ingredient-tabs" id="ingredient-tabs">
+            <!-- tabs = category tabs, updated when category changes -->
+          </div>
+          <div class="ingredient-list-wrap">
+            <div class="ingredient-chips" id="ingredient-chips"></div>
+          </div>
+          <div class="add-ingredient-row">
+            <input type="text" id="new-ingredient-input" placeholder="Lisää mukauttava ainesosa…" onkeydown="if(event.key==='Enter')addNewIngredient()"/>
+            <button onclick="addNewIngredient()">+ Lisää</button>
+          </div>
+          <div class="selected-ingredients" id="selected-ingredients">
+            <span style="color:var(--muted);font-size:0.78rem;padding:2px 0">Ei vielä valittuja ainesosista</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button class="btn-cancel" id="btn-cancel" onclick="cancelEdit()" style="display:none">Cancel</button>
+        <button class="btn-save" id="btn-save" onclick="saveProduct()">＋ Add to Menu</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────
+let editingId   = null;
+let selectedCat = 'pizza';
+let selectedIcon = '🍕';
+let selectedColor = 'pizza-img-1';
+let selectedBadge = 'none';
+let selectedIngredients = [];
+let selectedImageUrl = null;
+let deleteTargetId = null;
+let activeIngTab = null;  // which category tab is showing in ingredient panel
+
+const CAT_ICONS = {
+  pizza:    ['🍕','🍅','🧀','🌿','🔥','🫙','🧄','🌶'],
+  sides:    ['🥗','🧄','🫙','🥙','🥚','🍞','🫒','🥬'],
+  desserts: ['🍮','🍫','🍰','🍨','🧁','🍓','☕','🍬'],
+  drinks:   ['🥤','🍺','🍷','☕','🧃','💧','🫗','🧊'],
+};
+
+const CAT_COLORS = {
+  pizza:    ['pizza-img-1','pizza-img-2','pizza-img-3','pizza-img-4','pizza-img-5','pizza-img-6','pizza-img-7','pizza-img-8'],
+  sides:    ['sides-img-1','sides-img-2','sides-img-3','pizza-img-1','pizza-img-5','pizza-img-4'],
+  desserts: ['dessert-img-1','dessert-img-2','pizza-img-1','pizza-img-4','pizza-img-8'],
+  drinks:   ['drinks-img-1','drinks-img-2','drinks-img-3','pizza-img-1','dessert-img-1'],
+};
+
+const BADGE_DISPLAY = {
+  none:    null,
+  popular: { label: '⭐ Popular', cls: '' },
+  spicy:   { label: '🌶 Spicy',   cls: 'spicy' },
+  new:     { label: '✨ New',      cls: 'new' },
+  veg:     { label: '🌿 Veg',     cls: 'veg' },
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderList();
+  rebuildIconPicker();
+  rebuildColorPicker();
+  rebuildIngredientPanel();
+  updatePreview();
+});
+
+// ─── Product List ─────────────────────────────────────────────────────────
+function renderList() {
+  const products = ProductStore.getAll();
+  const list = document.getElementById('product-list');
+  document.getElementById('product-count').textContent = products.length + ' item' + (products.length !== 1 ? 's' : '');
+
+  if (products.length === 0) {
+    list.innerHTML = `<div class="list-empty"><div class="list-empty-icon">🍽️</div><p>No products yet.<br/>Use the form to add your first one.</p></div>`;
+    return;
+  }
+
+  // Group by category
+  const cats = ['pizza','sides','desserts','drinks'];
+  const catLabels = { pizza:'🍕 Pizzas', sides:'🥗 Sides', desserts:'🍮 Desserts', drinks:'🥤 Drinks' };
+  list.innerHTML = '';
+
+  cats.forEach(cat => {
+    const items = products.filter(p => p.category === cat);
+    if (items.length === 0) return;
+    const lbl = document.createElement('div');
+    lbl.className = 'cat-group-label';
+    lbl.textContent = catLabels[cat];
+    list.appendChild(lbl);
+
+    items.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'product-row' + (editingId === p.id ? ' selected' : '');
+      row.id = 'row-' + p.id;
+      row.innerHTML = `
+        <div class="product-row-icon">${p.icon}</div>
+        <div class="product-row-info">
+          <div class="product-row-name">${p.name}</div>
+          <div class="product-row-meta">
+            <span class="cat-pill">${p.category}</span>
+            <span>${p.ingredients.slice(0,3).join(', ')}${p.ingredients.length > 3 ? '…' : ''}</span>
+          </div>
+        </div>
+        <span class="product-row-price">$${parseFloat(p.price).toFixed(2)}</span>
+        <div class="row-actions">
+          <button class="icon-btn edit" title="Edit" onclick="editProduct('${p.id}', event)">✏️</button>
+          <button class="icon-btn del"  title="Remove" onclick="askDelete('${p.id}', '${p.name.replace(/'/g,"\\'")}', event)">🗑</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  });
+}
+
+// ─── Form helpers ─────────────────────────────────────────────────────────
+function selectCat(el) {
+  document.querySelectorAll('.cat-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCat = el.dataset.val;
+  // Reset color & icon to first for this category
+  selectedIcon  = CAT_ICONS[selectedCat][0];
+  selectedColor = CAT_COLORS[selectedCat][0];
+  rebuildIconPicker();
+  rebuildColorPicker();
+  rebuildIngredientPanel();
+  updatePreview();
+}
+
+function rebuildIconPicker() {
+  const wrap = document.getElementById('icon-selector');
+  wrap.innerHTML = '';
+  CAT_ICONS[selectedCat].forEach(icon => {
+    const el = document.createElement('div');
+    el.className = 'icon-opt' + (icon === selectedIcon ? ' selected' : '');
+    el.textContent = icon;
+    el.onclick = () => { selectedIcon = icon; rebuildIconPicker(); updatePreview(); };
+    wrap.appendChild(el);
+  });
+}
+
+function rebuildColorPicker() {
+  const wrap = document.getElementById('color-selector');
+  wrap.innerHTML = '';
+  CAT_COLORS[selectedCat].forEach(cls => {
+    const el = document.createElement('div');
+    el.className = 'color-opt swatch-' + cls + (cls === selectedColor ? ' selected' : '');
+    el.title = cls;
+    el.onclick = () => { selectedColor = cls; rebuildColorPicker(); updatePreview(); };
+    wrap.appendChild(el);
+  });
+}
+
+function selectBadge(el) {
+  document.querySelectorAll('.badge-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedBadge = el.dataset.val;
+  updatePreview();
+}
+
+// ─── Ingredient panel ─────────────────────────────────────────────────────
+function rebuildIngredientPanel() {
+  // The panel shows all ingredient categories as tabs
+  const lib = ProductStore.getIngredients();
+  const allCats = Object.keys(lib);
+  activeIngTab = activeIngTab && lib[activeIngTab] ? activeIngTab : selectedCat;
+
+  // Tabs
+  const tabsEl = document.getElementById('ingredient-tabs');
+  const catIcons = { pizza:'🍕', sides:'🥗', desserts:'🍮', drinks:'🥤' };
+  tabsEl.innerHTML = allCats.map(c =>
+    `<div class="ing-tab ${c === activeIngTab ? 'active' : ''}" onclick="switchIngTab('${c}')">${catIcons[c] || ''} ${c}</div>`
+  ).join('');
+
+  renderIngredientChips();
+  renderSelectedChips();
+}
+
+function switchIngTab(cat) {
+  activeIngTab = cat;
+  document.querySelectorAll('.ing-tab').forEach(t => t.classList.toggle('active', t.textContent.includes(cat)));
+  renderIngredientChips();
+}
+
+function renderIngredientChips() {
+  const lib = ProductStore.getIngredients();
+  const list = lib[activeIngTab] || [];
+  const wrap = document.getElementById('ingredient-chips');
+  wrap.innerHTML = '';
+  list.forEach(ing => {
+    const chip = document.createElement('div');
+    chip.className = 'ing-chip' + (selectedIngredients.includes(ing) ? ' selected' : '');
+    chip.textContent = ing;
+    chip.onclick = () => toggleIngredient(ing);
+    wrap.appendChild(chip);
+  });
+}
+
+function toggleIngredient(ing) {
+  const idx = selectedIngredients.indexOf(ing);
+  if (idx === -1) selectedIngredients.push(ing);
+  else selectedIngredients.splice(idx, 1);
+  renderIngredientChips();
+  renderSelectedChips();
+  updatePreview();
+}
+
+function renderSelectedChips() {
+  const wrap = document.getElementById('selected-ingredients');
+  if (selectedIngredients.length === 0) {
+    wrap.innerHTML = '<span style="color:var(--muted);font-size:0.78rem;padding:2px 0">No ingredients selected yet</span>';
+    return;
+  }
+  wrap.innerHTML = selectedIngredients.map(ing => `
+    <div class="sel-ing-chip">
+      ${ing}
+      <button onclick="toggleIngredient('${ing.replace(/'/g,"\\'")}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function addNewIngredient() {
+  const input = document.getElementById('new-ingredient-input');
+  const val = input.value.trim();
+  if (!val) return;
+  ProductStore.addIngredient(activeIngTab, val);
+  if (!selectedIngredients.includes(val)) selectedIngredients.push(val);
+  input.value = '';
+  rebuildIngredientPanel();
+  updatePreview();
+  showToast(`"${val}" added to ${activeIngTab} ingredients!`);
+}
+
+// ─── Image URL handling ───────────────────────────────────────────────────
+let imgLoadTimer;
+function onImageUrlChange(val) {
+  clearTimeout(imgLoadTimer);
+  const status = document.getElementById('img-url-status');
+  const clearBtn = document.getElementById('img-url-clear');
+  const trimmed = val.trim();
+
+  if (!trimmed) {
+    selectedImageUrl = null;
+    status.textContent = '';
+    status.className = 'img-url-status';
+    clearBtn.style.display = 'none';
+    setColorIconDimmed(false);
+    updatePreview();
+    return;
+  }
+
+  clearBtn.style.display = 'inline-block';
+  status.textContent = 'Checking image…';
+  status.className = 'img-url-status';
+
+  imgLoadTimer = setTimeout(() => {
+    const img = new Image();
+    img.onload = () => {
+      selectedImageUrl = trimmed;
+      status.textContent = '✓ Image loaded successfully';
+      status.className = 'img-url-status ok';
+      setColorIconDimmed(true);
+      updatePreview();
+    };
+    img.onerror = () => {
+      selectedImageUrl = null;
+      status.textContent = '✗ Could not load image — check the URL';
+      status.className = 'img-url-status err';
+      setColorIconDimmed(false);
+      updatePreview();
+    };
+    img.src = trimmed;
+  }, 600);
+}
+
+function clearImageUrl() {
+  document.getElementById('f-img-url').value = '';
+  selectedImageUrl = null;
+  document.getElementById('img-url-clear').style.display = 'none';
+  document.getElementById('img-url-status').textContent = '';
+  document.getElementById('img-url-status').className = 'img-url-status';
+  setColorIconDimmed(false);
+  updatePreview();
+}
+
+function setColorIconDimmed(dim) {
+  ['color-selector','icon-selector'].forEach(id => {
+    document.getElementById(id).closest('.form-group').classList.toggle('dimmed', dim);
+  });
+}
+
+// ─── Live Preview ─────────────────────────────────────────────────────────
+function updatePreview() {
+  const name  = document.getElementById('f-name').value.trim() || 'Product Name';
+  const price = parseFloat(document.getElementById('f-price').value) || 0;
+  const desc  = selectedIngredients.length > 0 ? selectedIngredients.join(', ') : 'Select ingredients below…';
+
+  document.getElementById('preview-name').textContent  = name;
+  document.getElementById('preview-desc').textContent  = desc;
+  document.getElementById('preview-price').textContent = '$' + price.toFixed(2);
+
+  const imgEl = document.getElementById('preview-img');
+  if (selectedImageUrl) {
+    imgEl.className = 'preview-img has-photo';
+    imgEl.style.backgroundImage = `url('${selectedImageUrl}')`;
+  } else {
+    imgEl.className = 'preview-img ' + selectedColor;
+    imgEl.style.backgroundImage = '';
+  }
+
+  const badgeEl = document.getElementById('preview-badge');
+  const bd = BADGE_DISPLAY[selectedBadge];
+  if (bd) {
+    badgeEl.style.display = 'block';
+    badgeEl.className = 'card-badge ' + bd.cls;
+    badgeEl.textContent = bd.label;
+  } else {
+    badgeEl.style.display = 'none';
+  }
+}
+
+// ─── Save / Edit / Delete ─────────────────────────────────────────────────
+function saveProduct() {
+  const name  = document.getElementById('f-name').value.trim();
+  const price = parseFloat(document.getElementById('f-price').value);
+
+  if (!name) { showToast('⚠️ Please enter a product name'); return; }
+  if (isNaN(price) || price <= 0) { showToast('⚠️ Please enter a valid price'); return; }
+  if (selectedIngredients.length === 0) { showToast('⚠️ Add at least one ingredient'); return; }
+
+  const data = {
+    name, price, category: selectedCat,
+    icon: selectedIcon, colorClass: selectedColor,
+    imageUrl: selectedImageUrl || null,
+    badge: selectedBadge === 'none' ? null : selectedBadge,
+    ingredients: [...selectedIngredients]
+  };
+
+  if (editingId) {
+    ProductStore.update(editingId, data);
+    showToast(`✅ "${name}" updated!`);
+    editingId = null;
+    document.getElementById('btn-cancel').style.display = 'none';
+    document.getElementById('btn-save').textContent = '＋ Add to Menu';
+    document.getElementById('form-title').textContent = 'Add New Item';
+  } else {
+    ProductStore.add(data);
+    showToast(`🎉 "${name}" added to the menu!`);
+  }
+
+  resetForm();
+  renderList();
+}
+
+function editProduct(id, e) {
+  e && e.stopPropagation();
+  const p = ProductStore.getById(id);
+  if (!p) return;
+
+  editingId = id;
+  document.getElementById('f-name').value  = p.name;
+  document.getElementById('f-price').value = p.price;
+  selectedCat   = p.category;
+  selectedIcon  = p.icon;
+  selectedColor = p.colorClass || CAT_COLORS[p.category][0];
+  selectedBadge = p.badge || 'none';
+  selectedIngredients = [...p.ingredients];
+
+  // Populate image URL
+  const urlInput = document.getElementById('f-img-url');
+  urlInput.value = p.imageUrl || '';
+  if (p.imageUrl) {
+    selectedImageUrl = p.imageUrl;
+    document.getElementById('img-url-clear').style.display = 'inline-block';
+    document.getElementById('img-url-status').textContent = '✓ Image loaded successfully';
+    document.getElementById('img-url-status').className = 'img-url-status ok';
+    setColorIconDimmed(true);
+  } else {
+    selectedImageUrl = null;
+    document.getElementById('img-url-clear').style.display = 'none';
+    document.getElementById('img-url-status').textContent = '';
+    document.getElementById('img-url-status').className = 'img-url-status';
+    setColorIconDimmed(false);
+  }
+
+  // Update UI
+  document.querySelectorAll('.cat-opt').forEach(o => o.classList.toggle('selected', o.dataset.val === selectedCat));
+  document.querySelectorAll('.badge-opt').forEach(o => o.classList.toggle('selected', o.dataset.val === selectedBadge));
+
+  rebuildIconPicker();
+  rebuildColorPicker();
+  activeIngTab = selectedCat;
+  rebuildIngredientPanel();
+  updatePreview();
+
+  document.getElementById('btn-cancel').style.display = 'inline-block';
+  document.getElementById('btn-save').textContent = '💾 Save Changes';
+  document.getElementById('form-title').textContent = 'Edit: ' + p.name;
+
+  // Highlight row
+  document.querySelectorAll('.product-row').forEach(r => r.classList.remove('selected'));
+  const row = document.getElementById('row-' + id);
+  if (row) { row.classList.add('selected'); row.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+  // Scroll form into view on mobile
+  document.getElementById('form-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelEdit() {
+  editingId = null;
+  resetForm();
+  renderList();
+  document.getElementById('btn-cancel').style.display = 'none';
+  document.getElementById('btn-save').textContent = '＋ Add to Menu';
+  document.getElementById('form-title').textContent = 'Add New Item';
+}
+
+function resetForm() {
+  document.getElementById('f-name').value  = '';
+  document.getElementById('f-price').value = '';
+  document.getElementById('f-img-url').value = '';
+  selectedImageUrl = null;
+  document.getElementById('img-url-clear').style.display = 'none';
+  document.getElementById('img-url-status').textContent = '';
+  document.getElementById('img-url-status').className = 'img-url-status';
+  setColorIconDimmed(false);
+  selectedCat   = 'pizza';
+  selectedIcon  = '🍕';
+  selectedColor = 'pizza-img-1';
+  selectedBadge = 'none';
+  selectedIngredients = [];
+  document.querySelectorAll('.cat-opt').forEach(o => o.classList.toggle('selected', o.dataset.val === 'pizza'));
+  document.querySelectorAll('.badge-opt').forEach(o => o.classList.toggle('selected', o.dataset.val === 'none'));
+  rebuildIconPicker();
+  rebuildColorPicker();
+  activeIngTab = 'pizza';
+  rebuildIngredientPanel();
+  updatePreview();
+}
+
+// ─── Delete ───────────────────────────────────────────────────────────────
+function askDelete(id, name, e) {
+  e && e.stopPropagation();
+  deleteTargetId = id;
+  document.getElementById('delete-name-msg').textContent = `"${name}" will be removed from the menu.`;
+  document.getElementById('delete-confirm').style.display = 'flex';
+}
+function closeDeleteConfirm() {
+  document.getElementById('delete-confirm').style.display = 'none';
+  deleteTargetId = null;
+}
+function confirmDelete() {
+  if (!deleteTargetId) return;
+  ProductStore.remove(deleteTargetId);
+  if (editingId === deleteTargetId) cancelEdit();
+  deleteTargetId = null;
+  closeDeleteConfirm();
+  renderList();
+  showToast('🗑️ Product removed from menu');
+}
+
+// ─── Reset Defaults ───────────────────────────────────────────────────────
+function resetToDefaults() {
+  if (!confirm('Reset the entire menu back to the default products? This cannot be undone.')) return;
+  ProductStore.reset();
+  cancelEdit();
+  renderList();
+  showToast('↺ Menu reset to defaults');
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close delete modal on overlay click
+document.getElementById('delete-confirm').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeDeleteConfirm();
+});
+</script>
+</body>
+</html>
