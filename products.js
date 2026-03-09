@@ -11,13 +11,13 @@ const DEFAULT_PRODUCTS = [
   {
     id: 'p001', name: 'Margherita', category: 'pizza',
     price: 12.99, badge: 'popular', icon: '🍕',
-    colorClass: 'pizza-img-1', imageUrl: null,
+    colorClass: 'pizza-img-1', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/250px-Eq_it-na_pizza-margherita_sep2005_sml.jpg',
     ingredients: ['tuore tomaatti','mozzarella','tuore basilika','oliiviöljy']
   },
   {
     id: 'p002', name: 'Pepperoni Inferno', category: 'pizza',
     price: 14.99, badge: 'spicy', icon: '🍕',
-    colorClass: 'pizza-img-2', imageUrl: null,
+    colorClass: 'pizza-img-2', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/64/NYPizzaPie.jpg',
     ingredients: ['tupla pepperoni','tulinen nduja','mozzarella','chili hunajalla']
   },
   {
