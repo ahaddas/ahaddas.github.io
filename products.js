@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   products.js  –  Napoli's Pizza shared product store
+   products.js  –  Reijon Roiskeläpät shared product store
    Uses localStorage so changes made in manage-products.html
    are instantly reflected on pizzaindex.html
 ═══════════════════════════════════════════════════ */
@@ -17,7 +17,7 @@ const DEFAULT_PRODUCTS = [
   {
     id: 'p002', name: 'Pepperoni Inferno', category: 'pizza',
     price: 14.99, badge: 'spicy', icon: '🍕',
-    colorClass: 'pizza-img-2', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/64/NYPizzaPie.jpg',
+    colorClass: 'pizza-img-2', imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/91/Pizza-3007395.jpg',
     ingredients: ['tupla pepperoni','tulinen nduja','mozzarella','chili hunajalla']
   },
   {
@@ -99,15 +99,15 @@ const DEFAULT_PRODUCTS = [
     ingredients: ['Coca-Cola','Coca-Cola Light','Limonadi','Fanta appelsiini','330ml tölkki']
   },
   {
-    id: 'dr003', name: 'Kalja', category: 'drinks',
+    id: 'dr003', name: 'Käsityöolut', category: 'drinks',
     price: 5.49, badge: null, icon: '🍺',
     colorClass: 'drinks-img-3', imageUrl: null,
-    ingredients: ['paikallinen kalja','IPA','pale ale','330ml pullo']
+    ingredients: ['paikallinen käsityöolut','IPA','pale ale','330ml pullo']
   }
 ];
 
 // ─── Ingredient library (employee can extend this) ─────────────────────
-const INGREDIENTS_KEY = 'reijo_ingredients';
+const INGREDIENTS_KEY = 'napoli_ingredients';
 
 const DEFAULT_INGREDIENTS = {
   pizza: [
@@ -210,3 +210,5 @@ const ProductStore = {
     localStorage.setItem(INGREDIENTS_KEY, JSON.stringify(DEFAULT_INGREDIENTS));
   }
 };
+
+
