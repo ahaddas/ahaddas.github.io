@@ -6,6 +6,10 @@
   --accent: #1db954;
   --text:   #ffffff;
   --text-dim: #022f10;
+  --font-family:       Arial, sans-serif;
+  --event-first-size:  56px;
+  --event-title-size:  40px;
+  --event-spacing:     20px;
 }
 
 /* -------------------------------------------------------
@@ -22,7 +26,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   color: var(--text);
-  font-family: Arial, sans-serif;
+  font-family: var(--font-family);
   text-align: left;
   padding-left: 10%;
   display: flex;
@@ -378,6 +382,7 @@ h1 {
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.6s ease, transform 0.6s ease;
+  margin-bottom: var(--event-spacing);
 }
 
 .event.visible {
@@ -385,8 +390,8 @@ h1 {
   transform: translateY(0);
 }
 
-#event1 .title { font-size: 48px; }
-#event1 .subtitle { font-size: 32px; }
+#event1 .title   { font-size: var(--event-first-size); }
+#event1 .subtitle { font-size: calc(var(--event-first-size) * 0.6); }
 
 .event.visible {
   transition-delay: var(--slot-delay, 0.2s);
@@ -397,13 +402,13 @@ h1 {
 #event2.visible { transition-delay: 0.5s; }
 
 .event .title {
-  font-size: 40px;
+  font-size: var(--event-title-size);
   font-weight: bold;
   color: var(--text);
 }
 
 .event .subtitle {
-  font-size: 28px;
+  font-size: calc(var(--event-title-size) * 0.7);
   opacity: 0.8;
   font-weight: bold;
   color: var(--text-dim);
@@ -511,6 +516,15 @@ video {
 /* -------------------------------------------------------
    LEADERBOARD
 ------------------------------------------------------- */
+.leaderboard-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: var(--text);
+  margin-bottom: 24px;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
 .leaderboard-row {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -609,3 +623,40 @@ video {
 }
 
 .btn-danger:hover { background: rgba(220, 53, 69, 0.28); }
+
+/* -------------------------------------------------------
+   FONT PREVIEW
+------------------------------------------------------- */
+.cfg-font-preview {
+  position: relative;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 18px 20px 16px;
+  margin: 10px 0 14px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.cfg-font-preview-label {
+  position: absolute;
+  top: 7px;
+  left: 14px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.35;
+  font-family: 'Courier New', monospace;
+  pointer-events: none;
+}
+
+#cfg-fontPreviewText {
+  font-size: 26px;
+  font-weight: bold;
+  color: var(--text);
+  line-height: 1.2;
+  padding-top: 10px;
+  transition: font-family 0.3s;
+  word-break: break-word;
+}
