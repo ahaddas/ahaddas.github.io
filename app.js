@@ -13,11 +13,13 @@ const DEFAULT_CONFIG = {
   scheduleTitle: "Tulossa tänään:",
   upcomingCount: 3,
   display: {
-    fontFamily:     "Arial, sans-serif",
-    fontUrl:        "",
-    eventFirstSize:  56,
-    eventTitleSize:  40,
-    eventSpacing:    20
+    fontFamily:           "Arial, sans-serif",
+    fontUrl:              "",
+    eventFirstSize:       56,
+    eventTitleSize:       40,
+    eventSpacing:         20,
+    scheduleMarginLeft:   3,
+    sidepanelMarginRight: 4
   },
   theme: {
     bg:      "#03531b",
@@ -696,9 +698,11 @@ function openSettings() {
   document.getElementById("cfg-fontUrl").value        = d.fontUrl       || "";
   document.getElementById("cfg-fontFamily").value     = d.fontFamily    || DEFAULT_CONFIG.display.fontFamily;
   document.getElementById("cfg-fontCustom").style.display = preset === "custom" ? "block" : "none";
-  document.getElementById("cfg-eventFirstSize").value = d.eventFirstSize != null ? d.eventFirstSize : DEFAULT_CONFIG.display.eventFirstSize;
-  document.getElementById("cfg-eventTitleSize").value = d.eventTitleSize != null ? d.eventTitleSize : DEFAULT_CONFIG.display.eventTitleSize;
-  document.getElementById("cfg-eventSpacing").value   = d.eventSpacing   != null ? d.eventSpacing   : DEFAULT_CONFIG.display.eventSpacing;
+  document.getElementById("cfg-eventFirstSize").value        = d.eventFirstSize       != null ? d.eventFirstSize       : DEFAULT_CONFIG.display.eventFirstSize;
+  document.getElementById("cfg-eventTitleSize").value        = d.eventTitleSize       != null ? d.eventTitleSize       : DEFAULT_CONFIG.display.eventTitleSize;
+  document.getElementById("cfg-eventSpacing").value          = d.eventSpacing         != null ? d.eventSpacing         : DEFAULT_CONFIG.display.eventSpacing;
+  document.getElementById("cfg-scheduleMarginLeft").value    = d.scheduleMarginLeft   != null ? d.scheduleMarginLeft   : DEFAULT_CONFIG.display.scheduleMarginLeft;
+  document.getElementById("cfg-sidepanelMarginRight").value  = d.sidepanelMarginRight != null ? d.sidepanelMarginRight : DEFAULT_CONFIG.display.sidepanelMarginRight;
   updateFontPreview();
 
   // Theme colors
@@ -750,9 +754,11 @@ function saveSettings() {
                                  : (opt.dataset.family || DEFAULT_CONFIG.display.fontFamily),
         fontUrl:        isCustom ? document.getElementById("cfg-fontUrl").value.trim()
                                  : (opt.dataset.url || ""),
-        eventFirstSize: Math.max(12, Number(document.getElementById("cfg-eventFirstSize").value) || DEFAULT_CONFIG.display.eventFirstSize),
-        eventTitleSize: Math.max(12, Number(document.getElementById("cfg-eventTitleSize").value) || DEFAULT_CONFIG.display.eventTitleSize),
-        eventSpacing:   Math.max(0,  Number(document.getElementById("cfg-eventSpacing").value)   || DEFAULT_CONFIG.display.eventSpacing),
+        eventFirstSize:       Math.max(12, Number(document.getElementById("cfg-eventFirstSize").value)        || DEFAULT_CONFIG.display.eventFirstSize),
+        eventTitleSize:       Math.max(12, Number(document.getElementById("cfg-eventTitleSize").value)        || DEFAULT_CONFIG.display.eventTitleSize),
+        eventSpacing:         Math.max(0,  Number(document.getElementById("cfg-eventSpacing").value)          || DEFAULT_CONFIG.display.eventSpacing),
+        scheduleMarginLeft:   Math.max(0,  Number(document.getElementById("cfg-scheduleMarginLeft").value)    ?? DEFAULT_CONFIG.display.scheduleMarginLeft),
+        sidepanelMarginRight: Math.max(0,  Number(document.getElementById("cfg-sidepanelMarginRight").value)  ?? DEFAULT_CONFIG.display.sidepanelMarginRight),
       };
     })(),
     theme: {
@@ -831,9 +837,11 @@ function applyDisplay() {
   }
 
   root.style.setProperty("--font-family",       d.fontFamily    || DEFAULT_CONFIG.display.fontFamily);
-  root.style.setProperty("--event-first-size",  (d.eventFirstSize  || DEFAULT_CONFIG.display.eventFirstSize)  + "px");
-  root.style.setProperty("--event-title-size",  (d.eventTitleSize  || DEFAULT_CONFIG.display.eventTitleSize)  + "px");
-  root.style.setProperty("--event-spacing",     (d.eventSpacing    || DEFAULT_CONFIG.display.eventSpacing)    + "px");
+  root.style.setProperty("--event-first-size",       (d.eventFirstSize       || DEFAULT_CONFIG.display.eventFirstSize)       + "px");
+  root.style.setProperty("--event-title-size",       (d.eventTitleSize       || DEFAULT_CONFIG.display.eventTitleSize)       + "px");
+  root.style.setProperty("--event-spacing",          (d.eventSpacing         != null ? d.eventSpacing         : DEFAULT_CONFIG.display.eventSpacing)         + "px");
+  root.style.setProperty("--schedule-margin-left",   (d.scheduleMarginLeft   != null ? d.scheduleMarginLeft   : DEFAULT_CONFIG.display.scheduleMarginLeft)   + "%");
+  root.style.setProperty("--sidepanel-margin-right", (d.sidepanelMarginRight != null ? d.sidepanelMarginRight : DEFAULT_CONFIG.display.sidepanelMarginRight) + "%");
 }
 
 function applyRibbonLogo() {
