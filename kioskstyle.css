@@ -10,6 +10,8 @@
   --event-first-size:  56px;
   --event-title-size:  40px;
   --event-spacing:     20px;
+  --schedule-margin-left:  3%;
+  --sidepanel-margin-right: 4%;
 }
 
 /* -------------------------------------------------------
@@ -28,7 +30,7 @@ body {
   color: var(--text);
   font-family: var(--font-family);
   text-align: left;
-  padding-left: 10%;
+  padding: 0;
   display: flex;
   flex-direction: row;
   position: relative;
@@ -367,6 +369,8 @@ button:active { transform: scale(0.97); }
 ------------------------------------------------------- */
 #upcoming {
   flex: 1;
+  min-width: 0;
+  margin-left: var(--schedule-margin-left);
   padding-top: 10%;
   position: relative;
   z-index: 1;
@@ -419,11 +423,13 @@ h1 {
 ------------------------------------------------------- */
 #sidePanel {
   flex: 1;
-  padding-left: 10%;
-  padding-right: 15%;
+  min-width: 0;
+  padding-left: 5%;
+  padding-right: var(--sidepanel-margin-right);
   padding-top: 0;
   position: relative;
   z-index: 1;
+  height: 100vh;
 }
 
 /* -------------------------------------------------------
@@ -442,9 +448,13 @@ h1 {
 
 #leaderboardPanel {
   position: absolute;
-  inset: 0;
-  padding-top: 180px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 180px var(--sidepanel-margin-right) 0 5%;
   z-index: 5;
+  box-sizing: border-box;
 }
 
 #eventInfoPanel {
@@ -530,7 +540,7 @@ video {
   border-radius: 12px;
   padding: 15px 20px;
   margin-bottom: 15px;
-  max-width: 50%;
+  max-width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
