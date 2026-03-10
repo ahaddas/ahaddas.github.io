@@ -73,6 +73,74 @@
           </label>
         </section>
 
+        <!-- Typography & Layout -->
+        <section class="cfg-section">
+          <h3>Typography &amp; Layout</h3>
+          <p class="cfg-hint">Choose a display font for the kiosk. Select "Custom" to enter your own Google Fonts URL and family name.</p>
+
+          <label>Font
+            <select id="cfg-fontPreset" onchange="onFontPresetChange()">
+              <option value="system" data-family="Arial, sans-serif" data-url="">System default (Arial)</option>
+              <optgroup label="── Sans-serif ──────────────">
+                <option value="barlow"      data-family="'Barlow', sans-serif"       data-url="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&display=swap">Barlow</option>
+                <option value="figtree"     data-family="'Figtree', sans-serif"      data-url="https://fonts.googleapis.com/css2?family=Figtree:wght@400;700&display=swap">Figtree</option>
+                <option value="inter"       data-family="'Inter', sans-serif"        data-url="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">Inter</option>
+                <option value="ibmplexsans" data-family="'IBM Plex Sans', sans-serif" data-url="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap">IBM Plex Sans</option>
+                <option value="nunito"      data-family="'Nunito', sans-serif"       data-url="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap">Nunito</option>
+                <option value="outfit"      data-family="'Outfit', sans-serif"       data-url="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap">Outfit</option>
+                <option value="raleway"     data-family="'Raleway', sans-serif"      data-url="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap">Raleway</option>
+                <option value="syne"        data-family="'Syne', sans-serif"         data-url="https://fonts.googleapis.com/css2?family=Syne:wght@400;700&display=swap">Syne</option>
+              </optgroup>
+              <optgroup label="── Display / Bold ──────────">
+                <option value="bebasneue"   data-family="'Bebas Neue', sans-serif"   data-url="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap">Bebas Neue</option>
+                <option value="blackopsone" data-family="'Black Ops One', sans-serif" data-url="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap">Black Ops One</option>
+                <option value="oswald"      data-family="'Oswald', sans-serif"       data-url="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap">Oswald</option>
+                <option value="teko"        data-family="'Teko', sans-serif"         data-url="https://fonts.googleapis.com/css2?family=Teko:wght@400;700&display=swap">Teko</option>
+              </optgroup>
+              <optgroup label="── Serif ───────────────────">
+                <option value="dmserif"     data-family="'DM Serif Display', serif"  data-url="https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap">DM Serif Display</option>
+                <option value="lora"        data-family="'Lora', serif"              data-url="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap">Lora</option>
+                <option value="playfair"    data-family="'Playfair Display', serif"  data-url="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">Playfair Display</option>
+              </optgroup>
+              <optgroup label="── Monospace ───────────────">
+                <option value="ibmplexmono" data-family="'IBM Plex Mono', monospace" data-url="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap">IBM Plex Mono</option>
+                <option value="spacemono"   data-family="'Space Mono', monospace"    data-url="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap">Space Mono</option>
+              </optgroup>
+              <optgroup label="───────────────────────────">
+                <option value="custom" data-family="" data-url="">Custom…</option>
+              </optgroup>
+            </select>
+          </label>
+
+          <!-- Live font preview -->
+          <div id="cfg-fontPreview" class="cfg-font-preview">
+            <span class="cfg-font-preview-label">Preview</span>
+            <div id="cfg-fontPreviewText">Conference 2025 — Seuraavaksi</div>
+          </div>
+
+          <div id="cfg-fontCustom" style="display:none">
+            <p class="cfg-hint" style="margin-top:8px">Paste a Google Fonts stylesheet URL, then enter the font family name exactly as listed on Google Fonts.</p>
+            <label>Google Fonts stylesheet URL
+              <input id="cfg-fontUrl" type="url" placeholder="https://fonts.googleapis.com/css2?family=…&display=swap" oninput="onCustomFontInput()">
+            </label>
+            <label>Font family name
+              <input id="cfg-fontFamily" type="text" placeholder="'My Font', sans-serif" oninput="updateFontPreview()">
+            </label>
+          </div>
+
+          <div class="cfg-grid" style="margin-top:12px">
+            <label>First event size (px)
+              <input id="cfg-eventFirstSize" type="number" min="12" max="160" placeholder="56" style="font-family:'Courier New',monospace">
+            </label>
+            <label>Other events size (px)
+              <input id="cfg-eventTitleSize" type="number" min="12" max="120" placeholder="40" style="font-family:'Courier New',monospace">
+            </label>
+            <label>Spacing between events (px)
+              <input id="cfg-eventSpacing" type="number" min="0" max="200" placeholder="20" style="font-family:'Courier New',monospace">
+            </label>
+          </div>
+        </section>
+
         <!-- Appearance -->
         <section class="cfg-section">
           <h3>Appearance</h3>
@@ -132,6 +200,9 @@
             <label>Upcoming events to show
               <input id="cfg-upcomingCount" type="number" min="1" max="10" placeholder="3" style="font-family:'Courier New',monospace">
             </label>
+            <label>Schedule heading
+              <input id="cfg-scheduleTitle" type="text" placeholder="Tulossa tänään:">
+            </label>
           </div>
         </section>
 
@@ -167,6 +238,9 @@
             </label>
             <label>Rows to display
               <input id="cfg-leaderboardRows" type="number" min="1" max="50" placeholder="5" style="font-family:'Courier New',monospace">
+            </label>
+            <label>Leaderboard title
+              <input id="cfg-leaderboardTitle" type="text" placeholder="Leaderboard">
             </label>
           </div>
         </section>
