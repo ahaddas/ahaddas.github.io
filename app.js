@@ -9,7 +9,16 @@ const DEFAULT_CONFIG = {
   logoUrl: "",
   bgImage: "",
   leaderboardRows: 5,
+  leaderboardTitle: "Leaderboard",
+  scheduleTitle: "Tulossa tänään:",
   upcomingCount: 3,
+  display: {
+    fontFamily:     "Arial, sans-serif",
+    fontUrl:        "",
+    eventFirstSize:  56,
+    eventTitleSize:  40,
+    eventSpacing:    20
+  },
   theme: {
     bg:      "#03531b",
     accent:  "#1db954",
@@ -318,6 +327,10 @@ async function updateUpcoming() {
   window._latestEvents = events;
   const upcoming = getNextN(events, count);
 
+  // Update the schedule heading
+  const heading = document.querySelector("#upcoming h1");
+  if (heading) heading.textContent = cfg.scheduleTitle || DEFAULT_CONFIG.scheduleTitle;
+
   updateEventInfoPanel(upcoming[0]);
 
   const container = document.getElementById("upcoming");
@@ -471,9 +484,10 @@ function renderLeaderboard() {
   const data = _leaderboardCache;
   if (!data) return;
 
-  const rows = Math.max(1, Number(cfg.leaderboardRows) || 5);
+  const rows  = Math.max(1, Number(cfg.leaderboardRows) || 5);
+  const title = cfg.leaderboardTitle || DEFAULT_CONFIG.leaderboardTitle;
 
-  const html = data
+  const rowsHtml = data
     .slice(0, rows)
     .map((row, index) => `
       <div class="leaderboard-row" data-rank="${index}">
@@ -487,7 +501,7 @@ function renderLeaderboard() {
     .join("");
 
   const panel = document.getElementById("leaderboardPanel");
-  panel.innerHTML = html;
+  panel.innerHTML = `<div class="leaderboard-title">${title}</div>` + rowsHtml;
 }
 
 /* -------------------------------------------------------
@@ -592,6 +606,71 @@ function resetSettings() {
   showToast("Settings reset to defaults");
 }
 
+/* -------------------------------------------------------
+   FONT PRESET & PREVIEW HELPERS
+------------------------------------------------------- */
+// Inject a <link> for a Google Fonts URL into the settings panel so the
+// preview renders in the correct font without affecting the display yet.
+let _previewLinkEl = null;
+function injectPreviewFont(url) {
+  if (!_previewLinkEl) {
+    _previewLinkEl = document.createElement("link");
+    _previewLinkEl.rel = "stylesheet";
+    document.head.appendChild(_previewLinkEl);
+  }
+  if (url && _previewLinkEl.href !== url) _previewLinkEl.href = url;
+}
+
+function updateFontPreview() {
+  const sel      = document.getElementById("cfg-fontPreset");
+  const preview  = document.getElementById("cfg-fontPreviewText");
+  const isCustom = sel.value === "custom";
+
+  let family, url;
+  if (isCustom) {
+    family = document.getElementById("cfg-fontFamily").value.trim() || "Arial, sans-serif";
+    url    = document.getElementById("cfg-fontUrl").value.trim();
+  } else {
+    const opt = sel.options[sel.selectedIndex];
+    family = opt.dataset.family || "Arial, sans-serif";
+    url    = opt.dataset.url    || "";
+  }
+
+  if (url) injectPreviewFont(url);
+  preview.style.fontFamily = family;
+}
+
+function onCustomFontInput() {
+  const url = document.getElementById("cfg-fontUrl").value.trim();
+  if (url) injectPreviewFont(url);
+  updateFontPreview();
+}
+
+function onFontPresetChange() {
+  const sel      = document.getElementById("cfg-fontPreset");
+  const custom   = document.getElementById("cfg-fontCustom");
+  const isCustom = sel.value === "custom";
+  custom.style.display = isCustom ? "block" : "none";
+
+  if (!isCustom) {
+    const opt = sel.options[sel.selectedIndex];
+    document.getElementById("cfg-fontUrl").value    = opt.dataset.url    || "";
+    document.getElementById("cfg-fontFamily").value = opt.dataset.family || "";
+  }
+  updateFontPreview();
+}
+
+// Given a stored fontFamily + fontUrl, find the matching preset value or "custom"
+function detectFontPreset(family, url) {
+  const sel = document.getElementById("cfg-fontPreset");
+  for (const opt of sel.options) {
+    if (!opt.value || opt.value === "custom") continue;
+    if (opt.dataset.family === family) return opt.value;
+  }
+  // If there's a url/family set but no match, it's custom
+  return (family && family !== DEFAULT_CONFIG.display.fontFamily) ? "custom" : "system";
+}
+
 function openSettings() {
   const cfg = getConfig();
   const s = cfg.schedule;
@@ -605,8 +684,22 @@ function openSettings() {
   document.getElementById("cfg-promoInterval").value   = cfg.promoIntervalMinutes != null ? cfg.promoIntervalMinutes : 5;
   document.getElementById("cfg-logoUrl").value         = cfg.logoUrl        || "";
   document.getElementById("cfg-bgImage").value         = cfg.bgImage        || "";
-  document.getElementById("cfg-leaderboardRows").value = cfg.leaderboardRows != null ? cfg.leaderboardRows : 5;
-  document.getElementById("cfg-upcomingCount").value   = cfg.upcomingCount  != null ? cfg.upcomingCount  : 3;
+  document.getElementById("cfg-leaderboardRows").value  = cfg.leaderboardRows  != null ? cfg.leaderboardRows  : 5;
+  document.getElementById("cfg-leaderboardTitle").value = cfg.leaderboardTitle || "Leaderboard";
+  document.getElementById("cfg-scheduleTitle").value    = cfg.scheduleTitle    || "Tulossa tänään:";
+  document.getElementById("cfg-upcomingCount").value    = cfg.upcomingCount   != null ? cfg.upcomingCount   : 3;
+
+  // Display / typography
+  const d = Object.assign({}, DEFAULT_CONFIG.display, cfg.display || {});
+  const preset = detectFontPreset(d.fontFamily, d.fontUrl);
+  document.getElementById("cfg-fontPreset").value     = preset;
+  document.getElementById("cfg-fontUrl").value        = d.fontUrl       || "";
+  document.getElementById("cfg-fontFamily").value     = d.fontFamily    || DEFAULT_CONFIG.display.fontFamily;
+  document.getElementById("cfg-fontCustom").style.display = preset === "custom" ? "block" : "none";
+  document.getElementById("cfg-eventFirstSize").value = d.eventFirstSize != null ? d.eventFirstSize : DEFAULT_CONFIG.display.eventFirstSize;
+  document.getElementById("cfg-eventTitleSize").value = d.eventTitleSize != null ? d.eventTitleSize : DEFAULT_CONFIG.display.eventTitleSize;
+  document.getElementById("cfg-eventSpacing").value   = d.eventSpacing   != null ? d.eventSpacing   : DEFAULT_CONFIG.display.eventSpacing;
+  updateFontPreview();
 
   // Theme colors
   const t = cfg.theme || DEFAULT_CONFIG.theme;
@@ -644,7 +737,24 @@ function saveSettings() {
     logoUrl:               document.getElementById("cfg-logoUrl").value.trim(),
     bgImage:               document.getElementById("cfg-bgImage").value.trim(),
     leaderboardRows:       Math.max(1, Number(document.getElementById("cfg-leaderboardRows").value) || 5),
+    leaderboardTitle:      document.getElementById("cfg-leaderboardTitle").value.trim() || "Leaderboard",
+    scheduleTitle:         document.getElementById("cfg-scheduleTitle").value.trim()    || "Tulossa tänään:",
     upcomingCount:         Math.max(1, Number(document.getElementById("cfg-upcomingCount").value)   || 3),
+    display: (() => {
+      const sel    = document.getElementById("cfg-fontPreset");
+      const preset = sel.value;
+      const opt    = sel.options[sel.selectedIndex];
+      const isCustom = preset === "custom";
+      return {
+        fontFamily:     isCustom ? (document.getElementById("cfg-fontFamily").value.trim() || DEFAULT_CONFIG.display.fontFamily)
+                                 : (opt.dataset.family || DEFAULT_CONFIG.display.fontFamily),
+        fontUrl:        isCustom ? document.getElementById("cfg-fontUrl").value.trim()
+                                 : (opt.dataset.url || ""),
+        eventFirstSize: Math.max(12, Number(document.getElementById("cfg-eventFirstSize").value) || DEFAULT_CONFIG.display.eventFirstSize),
+        eventTitleSize: Math.max(12, Number(document.getElementById("cfg-eventTitleSize").value) || DEFAULT_CONFIG.display.eventTitleSize),
+        eventSpacing:   Math.max(0,  Number(document.getElementById("cfg-eventSpacing").value)   || DEFAULT_CONFIG.display.eventSpacing),
+      };
+    })(),
     theme: {
       bg:      document.getElementById("cfg-colorBgHex").value.trim()      || DEFAULT_CONFIG.theme.bg,
       accent:  document.getElementById("cfg-colorAccentHex").value.trim()  || DEFAULT_CONFIG.theme.accent,
@@ -673,6 +783,7 @@ function saveSettings() {
 
   // Re-apply dynamic settings immediately
   applyTheme();
+  applyDisplay();
   applyRibbonLogo();
   applyVideoSrc();
   schedulePromo();
@@ -700,6 +811,29 @@ function applyTheme() {
 
   const bg = cfg.bgImage ? directUrl(cfg.bgImage, "image") : "";
   document.body.style.backgroundImage = bg ? `url("${bg}")` : "";
+}
+
+function applyDisplay() {
+  const cfg = getConfig();
+  const d   = Object.assign({}, DEFAULT_CONFIG.display, cfg.display || {});
+  const root = document.documentElement;
+
+  // Load Google Font if a URL is given, otherwise use the typed family name
+  if (d.fontUrl) {
+    let link = document.getElementById("dynamic-font-link");
+    if (!link) {
+      link = document.createElement("link");
+      link.id  = "dynamic-font-link";
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+    }
+    if (link.href !== d.fontUrl) link.href = d.fontUrl;
+  }
+
+  root.style.setProperty("--font-family",       d.fontFamily    || DEFAULT_CONFIG.display.fontFamily);
+  root.style.setProperty("--event-first-size",  (d.eventFirstSize  || DEFAULT_CONFIG.display.eventFirstSize)  + "px");
+  root.style.setProperty("--event-title-size",  (d.eventTitleSize  || DEFAULT_CONFIG.display.eventTitleSize)  + "px");
+  root.style.setProperty("--event-spacing",     (d.eventSpacing    || DEFAULT_CONFIG.display.eventSpacing)    + "px");
 }
 
 function applyRibbonLogo() {
@@ -741,6 +875,7 @@ function schedulePromo() {
 ------------------------------------------------------- */
 function startLoops() {
   applyTheme();
+  applyDisplay();
   applyRibbonLogo();
   applyVideoSrc();
   schedulePromo();
